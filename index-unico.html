@@ -1,0 +1,3565 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#C9A84C">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sola Verbo">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <title>Sola Verbo - Bíblia de Estudo</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <!-- <link rel="stylesheet" href="style.css"> -->
+
+    <style>
+        :root {
+            --gold: #C9A84C;
+            --gold-light: #F0D898;
+            --gold-dark: #7A5E1E;
+            --bg: #0F0D0A;
+            --bg2: #181410;
+            --bg3: #231F18;
+            --bg4: #2E2820;
+            --surface: #1E1A14;
+            --border: rgba(201, 168, 76, 0.18);
+            --border2: rgba(201, 168, 76, 0.35);
+            --text: #EDE8DC;
+            --text2: #B5A989;
+            --text3: #7A6F56;
+            --highlight: rgba(201, 168, 76, 0.22);
+            --highlight-border: rgba(201, 168, 76, 0.7);
+            --verse-num: #C9A84C;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --search-hl: rgba(255, 200, 50, 0.35);
+            --fav: #E05C7A;
+            --accent: #C9A84C;
+            --marker-yellow: rgba(255, 235, 59, 0.25);
+            --marker-green: rgba(76, 175, 80, 0.25);
+            --marker-blue: rgba(33, 150, 243, 0.25);
+            --marker-pink: rgba(233, 30, 99, 0.25);
+            --marker-orange: rgba(255, 152, 0, 0.25);
+            --note-color: #64B5F6;
+            --crossref-color: #CE93D8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg);
+        }
+
+        /* ============ HEADER ============ */
+        .app-header {
+            background: linear-gradient(180deg, var(--bg3) 0%, var(--bg2) 100%);
+            color: var(--text);
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .header-top h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .header-verse {
+            color: var(--text3);
+            font-size: 0.7rem;
+            font-style: italic;
+            text-align: right;
+            line-height: 1.3;
+        }
+
+        .header-verse small {
+            color: var(--gold);
+            font-size: 0.65rem;
+        }
+
+        /* ============ FILTROS ============ */
+        .search-filters {
+            display: flex;
+            gap: 5px;
+            width: 100%;
+            margin-top: 6px;
+        }
+
+        .filter-select {
+            padding: 6px 8px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--bg4);
+            color: var(--text2);
+            font-size: 0.78rem;
+            cursor: pointer;
+            flex: 1;
+            max-width: 150px;
+            transition: all 0.3s;
+        }
+
+        .filter-select:hover {
+            border-color: var(--border2);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .filter-select option {
+            background: var(--bg3);
+            color: var(--text);
+        }
+
+        .version-select {
+            max-width: 70px;
+        }
+
+        /* ============ MENU DE NAVEGAÇÃO ============ */
+        .nav-menu {
+            display: flex;
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-item {
+            flex: 1;
+            padding: 12px 8px;
+            border: none;
+            background: none;
+            color: var(--text2);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+            text-align: center;
+        }
+
+        .nav-item.active {
+            color: var(--gold);
+            border-bottom-color: var(--gold);
+        }
+
+        .nav-item:hover {
+            color: var(--gold-light);
+            background: var(--highlight);
+        }
+
+        /* ============ LISTA DE LIVROS ============ */
+        .book-list {
+            display: block;
+            padding: 12px;
+        }
+
+        .category-title {
+            color: var(--gold);
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin: 16px 0 8px 5px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border2);
+            letter-spacing: 0.5px;
+        }
+
+        .category-title:first-child {
+            margin-top: 5px;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .book-item {
+            padding: 12px 10px;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .book-item:hover {
+            border-color: var(--gold);
+            background: var(--highlight);
+            transform: translateY(-2px);
+        }
+
+        .book-item:active {
+            transform: scale(0.95);
+            background: var(--gold-dark);
+            color: var(--gold-light);
+        }
+
+        .book-name {
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .book-chapters {
+            color: var(--text3);
+            font-size: 0.7rem;
+            font-weight: 400;
+        }
+
+        .book-item:hover .book-chapters {
+            color: var(--gold-light);
+        }
+
+        /* ============ CONTEÚDO DO CAPÍTULO ============ */
+        .chapter-content {
+            padding: 12px;
+        }
+
+        .chapter-header {
+            background: var(--surface);
+            padding: 12px;
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .chapter-header h2 {
+            flex: 1;
+            font-size: 0.95rem;
+            min-width: 120px;
+            color: var(--gold-light);
+        }
+
+        .back-button {
+            padding: 6px 12px;
+            background: var(--bg4);
+            color: var(--text2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.8rem;
+        }
+
+        .back-button:hover {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            border-color: var(--border2);
+        }
+
+        /* ============ ÁUDIO ============ */
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .audio-button {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--bg4);
+            color: var(--text2);
+            border: 1px solid var(--border);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .audio-button:hover {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            border-color: var(--border2);
+        }
+
+        .audio-speed {
+            padding: 5px 6px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--bg4);
+            color: var(--text2);
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .audio-speed option {
+            background: var(--bg3);
+            color: var(--text);
+        }
+
+        /* ============ RESULTADOS DE BUSCA (NAV) ============ */
+        .search-results-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--highlight);
+            padding: 5px 10px;
+            border-radius: var(--radius);
+            font-size: 0.8rem;
+            order: 10;
+            width: 100%;
+            justify-content: center;
+            margin-top: 6px;
+            flex-wrap: wrap;
+            border: 1px solid var(--border2);
+        }
+
+        .nav-result {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            border: 1px solid var(--border2);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .nav-result:hover {
+            background: var(--gold);
+            color: var(--bg);
+        }
+
+        .occurrences-button {
+            background: var(--bg4);
+            color: var(--text2);
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .occurrences-button:hover {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            border-color: var(--border2);
+        }
+
+        .clear-search-button {
+            background: var(--fav);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            opacity: 0.8;
+        }
+
+        .clear-search-button:hover {
+            opacity: 1;
+        }
+
+        #result-counter {
+            font-weight: bold;
+            color: var(--gold-light);
+            font-size: 0.8rem;
+        }
+
+        .search-info {
+            font-size: 0.75rem;
+            color: var(--text3);
+            margin-left: 5px;
+        }
+
+        /* ============ VERSÍCULOS ============ */
+        .verse-container {
+            background: var(--surface);
+            padding: 10px 14px;
+            margin: 5px 0;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            position: relative;
+        }
+
+        .verse-container:hover {
+            border-color: var(--border2);
+            transform: translateX(3px);
+        }
+
+        .verse-number {
+            min-width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border: 1px solid var(--border2);
+        }
+
+        .verse-text {
+            flex: 1;
+            padding-top: 2px;
+            font-size: 0.9rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        .verse-actions {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+
+        .verse-action-btn {
+            background: none;
+            border: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 3px;
+            opacity: 0.5;
+            transition: all 0.2s;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .verse-action-btn:hover {
+            opacity: 1;
+            background: var(--border);
+        }
+
+        /* Marca-texto */
+        .marker-palette {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            padding: 6px;
+            z-index: 10;
+            gap: 5px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .marker-palette.show {
+            display: flex;
+        }
+
+        .marker-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .marker-color:hover {
+            transform: scale(1.15);
+            border-color: var(--gold-light);
+        }
+
+        .marker-color[data-color="yellow"] {
+            background: var(--marker-yellow);
+        }
+
+        .marker-color[data-color="green"] {
+            background: var(--marker-green);
+        }
+
+        .marker-color[data-color="blue"] {
+            background: var(--marker-blue);
+        }
+
+        .marker-color[data-color="pink"] {
+            background: var(--marker-pink);
+        }
+
+        .marker-color[data-color="orange"] {
+            background: var(--marker-orange);
+        }
+
+        .marker-clear {
+            font-size: 0.65rem;
+            color: var(--text3);
+            cursor: pointer;
+            padding: 3px;
+        }
+
+        .note-indicator {
+            font-size: 0.65rem;
+            color: var(--note-color);
+            margin-left: 4px;
+            vertical-align: super;
+        }
+
+        .verse-highlight {
+            background: var(--search-hl) !important;
+            border-left: 3px solid var(--gold) !important;
+        }
+
+        .current-result {
+            background: rgba(201, 168, 76, 0.35) !important;
+            border-left: 3px solid var(--gold-light) !important;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(201, 168, 76, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(201, 168, 76, 0);
+            }
+        }
+
+        mark {
+            background-color: var(--search-hl);
+            color: var(--gold-light);
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+
+        /* ============ NAVEGAÇÃO DE CAPÍTULOS ============ */
+        .chapter-navigation {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 6px;
+            margin: 12px 0;
+        }
+
+        .chapter-link {
+            padding: 10px 5px;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            font-size: 0.8rem;
+            color: var(--text2);
+        }
+
+        .chapter-link:hover {
+            background: var(--highlight);
+            color: var(--gold-light);
+            border-color: var(--border2);
+            transform: translateY(-2px);
+        }
+
+        /* ============ ABA DE BUSCA ============ */
+        .search-view {
+            padding: 0;
+        }
+
+        .search-page-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px 15px;
+        }
+
+        .search-hero {
+            text-align: center;
+            padding: 30px 20px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .search-hero h2 {
+            color: var(--gold);
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        .search-hero p {
+            color: var(--text3);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .search-bar-large {
+            display: flex;
+            gap: 8px;
+            max-width: 500px;
+            margin: 0 auto 15px;
+            position: relative;
+        }
+
+        .search-input-large {
+            flex: 1;
+            padding: 14px 18px;
+            border-radius: var(--radius);
+            border: 2px solid var(--border2);
+            background: var(--bg4);
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .search-input-large:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
+        }
+
+        .search-input-large::placeholder {
+            color: var(--text3);
+        }
+
+        .search-button-large {
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            border: 2px solid var(--border2);
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+
+        .search-button-large:hover {
+            background: var(--gold);
+            color: var(--bg);
+            border-color: var(--gold);
+        }
+
+        .search-actions-bar {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .action-button {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg4);
+            color: var(--text2);
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-button:hover {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            border-color: var(--border2);
+            transform: translateY(-2px);
+        }
+
+        /* Histórico */
+        .search-history {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            margin-top: 5px;
+        }
+
+        .search-history.active {
+            display: block;
+        }
+
+        .search-history-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .search-history-item:hover {
+            background: var(--highlight);
+        }
+
+        .search-history-term {
+            flex: 1;
+        }
+
+        .search-history-count {
+            font-size: 0.75rem;
+            color: var(--text3);
+            margin-left: 10px;
+        }
+
+        .search-history-remove {
+            background: none;
+            border: none;
+            color: var(--fav);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0 5px;
+            opacity: 0.7;
+        }
+
+        .search-history-remove:hover {
+            opacity: 1;
+        }
+
+        .search-history-clear {
+            padding: 10px;
+            text-align: center;
+            color: var(--fav);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .search-history-clear:hover {
+            background: var(--highlight);
+        }
+
+        /* ============ PÁGINA DE RESULTADOS ============ */
+        .search-results-page {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .search-results-header {
+            background: var(--surface);
+            padding: 15px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-results-header h2 {
+            color: var(--gold);
+            font-size: 1.1rem;
+            flex: 1;
+        }
+
+        .search-results-summary {
+            width: 100%;
+            color: var(--text2);
+            font-size: 0.85rem;
+            padding-top: 5px;
+            border-top: 1px solid var(--border);
+        }
+
+        .search-results-summary strong {
+            color: var(--gold-light);
+        }
+
+        .search-results-layout {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 15px;
+        }
+
+        .search-results-sidebar {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 15px;
+            max-height: 60vh;
+            overflow-y: auto;
+            align-self: start;
+        }
+
+        .search-results-sidebar h3 {
+            color: var(--gold);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .occurrence-book-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 3px;
+            font-size: 0.8rem;
+        }
+
+        .occurrence-book-item:hover {
+            background: var(--highlight);
+        }
+
+        .occurrence-book-item.active {
+            background: var(--highlight-border);
+            color: var(--bg);
+        }
+
+        .occurrence-book-name {
+            color: var(--text);
+            flex: 1;
+        }
+
+        .occurrence-book-badge {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .search-results-main {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .result-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .result-card:hover {
+            border-color: var(--border2);
+            background: var(--highlight);
+            transform: translateX(3px);
+        }
+
+        .result-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .result-reference {
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .result-book-badge {
+            background: var(--bg4);
+            color: var(--text3);
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 0.65rem;
+        }
+
+        .result-text {
+            color: var(--text2);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .result-action-btn {
+            background: var(--bg4);
+            color: var(--text2);
+            border: 1px solid var(--border);
+            padding: 5px 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.3s;
+        }
+
+        .result-action-btn:hover {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            border-color: var(--border2);
+        }
+
+        .results-info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            color: var(--text3);
+            font-size: 0.75rem;
+        }
+
+        .results-sort-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text2);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .results-sort-btn:hover {
+            border-color: var(--border2);
+            color: var(--gold-light);
+        }
+
+        .no-results-full {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text3);
+        }
+
+        .no-results-full .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        /* ============ COMPARAÇÃO ============ */
+        .compare-view-full {
+            padding: 15px;
+        }
+
+        .compare-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            background: var(--surface);
+            padding: 12px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            align-items: flex-end;
+        }
+
+        .compare-control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .compare-control-item label {
+            color: var(--text3);
+            font-size: 0.7rem;
+        }
+
+        .compare-control-item .filter-select {
+            max-width: 140px;
+        }
+
+        .compare-go-btn {
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border2);
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+
+        .compare-go-btn:hover {
+            background: var(--gold);
+            color: var(--bg);
+        }
+
+        .compare-panes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .compare-pane-full {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .compare-pane-header {
+            color: var(--gold);
+            text-align: center;
+            font-size: 0.9rem;
+            padding: 20px;
+        }
+
+        /* ============ MODAIS ============ */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-content {
+            background: var(--bg2);
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 550px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid var(--border2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--bg2);
+            border-radius: var(--radius) var(--radius) 0 0;
+            z-index: 1;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--gold);
+            font-size: 1rem;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: var(--text3);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .close-button:hover {
+            background: var(--highlight);
+            color: var(--text);
+        }
+
+        .note-textarea {
+            width: 100%;
+            min-height: 100px;
+            background: var(--bg4);
+            color: var(--text);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            padding: 10px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            resize: vertical;
+            margin: 8px 0;
+        }
+
+        .note-textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .save-note-btn {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            border: 1px solid var(--border2);
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .save-note-btn:hover {
+            background: var(--gold);
+            color: var(--bg);
+        }
+
+        .favorites-list {
+            padding: 10px;
+        }
+
+        .favorite-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+            cursor: pointer;
+        }
+
+        .favorite-item:hover {
+            background: var(--highlight);
+        }
+
+        .favorite-verse {
+            cursor: pointer;
+            color: var(--text);
+            font-weight: 500;
+            flex: 1;
+            font-size: 0.85rem;
+        }
+
+        .favorite-verse:hover {
+            color: var(--gold-light);
+            text-decoration: underline;
+        }
+
+        .remove-favorite {
+            background: var(--fav);
+            color: white;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            opacity: 0.7;
+        }
+
+        .remove-favorite:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .no-favorites {
+            text-align: center;
+            padding: 30px;
+            color: var(--text3);
+            font-size: 0.9rem;
+        }
+
+        .dictionary-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .dictionary-item:hover {
+            background: var(--highlight);
+        }
+
+        .dictionary-term {
+            font-weight: bold;
+            color: var(--gold);
+            margin-bottom: 3px;
+            font-size: 0.9rem;
+        }
+
+        .dictionary-definition {
+            color: var(--text2);
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .occurrences-list {
+            padding: 10px;
+        }
+
+        .occurrence-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+            cursor: pointer;
+        }
+
+        .occurrence-item:hover {
+            background: var(--highlight);
+        }
+
+        .occurrence-book {
+            cursor: pointer;
+            color: var(--text);
+            font-weight: 500;
+            flex: 1;
+            font-size: 0.85rem;
+        }
+
+        .occurrence-book:hover {
+            color: var(--gold-light);
+            text-decoration: underline;
+        }
+
+        .occurrence-count {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border: 1px solid var(--border2);
+        }
+
+        .occurrence-total {
+            padding: 14px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--gold-light);
+            background: var(--highlight);
+            border-radius: 0 0 var(--radius) var(--radius);
+            border-top: 1px solid var(--border);
+        }
+
+        .content-page-wrapper {
+            padding: 15px 18px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .content-section {
+            margin-bottom: 18px;
+        }
+
+        .content-section h3 {
+            color: var(--gold);
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ============ RODAPÉ ============ */
+        .app-footer {
+            background: linear-gradient(180deg, var(--bg3) 0%, var(--bg2) 100%);
+            border-top: 2px solid var(--border2);
+            margin-top: auto;
+            padding: 0;
+        }
+
+        .footer-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 25px 18px 12px;
+        }
+
+        .footer-top {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .footer-col h4 {
+            color: var(--gold);
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .footer-col p {
+            color: var(--text3);
+            font-size: 0.75rem;
+            line-height: 1.5;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 5px;
+        }
+
+        .footer-col ul li a {
+            color: var(--text2);
+            font-size: 0.75rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--gold-light);
+            padding-left: 4px;
+        }
+
+        .footer-contact li {
+            color: var(--text3);
+            font-size: 0.75rem;
+            margin-bottom: 5px;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 0.7rem;
+            color: var(--text3);
+            padding-top: 8px;
+        }
+
+        .footer-bottom a {
+            color: var(--text2);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-bottom a:hover {
+            color: var(--gold-light);
+        }
+
+        .footer-separator {
+            color: var(--border2);
+            margin: 0 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text3);
+            font-size: 0.9rem;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+
+            0%,
+            20% {
+                content: '.';
+            }
+
+            40% {
+                content: '..';
+            }
+
+            60%,
+            100% {
+                content: '...';
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold-dark);
+        }
+
+        @media (max-width:768px) {
+            .search-results-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .search-results-sidebar {
+                position: static;
+                max-height: none;
+                order: -1;
+            }
+
+            .compare-panes {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-top {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width:480px) {
+            .header-top h1 {
+                font-size: 0.9rem;
+            }
+
+            .app-header {
+                padding: 8px 10px;
+            }
+
+            .search-filters {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .filter-select {
+                flex: 1 1 45%;
+                max-width: none;
+                font-size: 0.72rem;
+                padding: 5px 6px;
+            }
+
+            .version-select {
+                max-width: 55px;
+            }
+
+            .nav-item {
+                padding: 10px 5px;
+                font-size: 0.75rem;
+            }
+
+            .category-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 5px;
+            }
+
+            .book-item {
+                padding: 8px 5px;
+                font-size: 0.7rem;
+            }
+
+            .book-name {
+                font-size: 0.7rem;
+            }
+
+            .book-chapters {
+                font-size: 0.6rem;
+            }
+
+            .chapter-navigation {
+                grid-template-columns: repeat(5, 1fr);
+            }
+
+            .footer-top {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (min-width:768px) {
+            .app-container {
+                max-width: 800px;
+                margin: 0 auto;
+                box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+            }
+
+            .category-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+
+            .chapter-navigation {
+                grid-template-columns: repeat(8, 1fr);
+            }
+        }
+
+        /* ============ VERSÍCULOS EM PARÁGRAFO ============ */
+        .paragraph-toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .toolbar-btn {
+            background: var(--bg4);
+            color: var(--text2);
+            border: 1px solid var(--border);
+            padding: 5px 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            border-color: var(--border2);
+        }
+
+        .verse-inline {
+            position: relative;
+            transition: background 0.3s;
+            border-radius: 3px;
+            padding: 1px 2px;
+            cursor: pointer;
+        }
+
+        .verse-inline:hover {
+            background: rgba(201, 168, 76, 0.1);
+            outline: 1px solid var(--border);
+        }
+
+        .verse-inline.selected-for-marker {
+            outline: 2px solid var(--gold) !important;
+            background: rgba(201, 168, 76, 0.15) !important;
+        }
+
+        .verse-number-inline {
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: var(--verse-num);
+            margin-right: 3px;
+            vertical-align: super;
+            cursor: pointer;
+        }
+
+        .verse-text-inline {
+            margin-right: 4px;
+        }
+
+        .verse-actions-inline {
+            display: inline-block;
+            opacity: 0;
+            transition: opacity 0.2s;
+            margin-left: 2px;
+        }
+
+        .verse-inline:hover .verse-actions-inline {
+            opacity: 1;
+        }
+
+        .verse-action-btn-inline {
+            background: none;
+            border: none;
+            font-size: 0.7rem;
+            cursor: pointer;
+            padding: 1px 2px;
+            opacity: 0.6;
+            transition: all 0.2s;
+            vertical-align: middle;
+        }
+
+        .verse-action-btn-inline:hover {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        /* REMOVER - Linhas pontilhadas */
+        /*.verse-has-note-inline {
+    border-bottom: 2px dotted var(--note-color);
+}
+
+.verse-has-crossref-inline {
+    border-bottom: 2px dotted var(--crossref-color);
+}*/
+
+
+        /* Highlight no parágrafo */
+        .verse-highlight {
+            background: var(--search-hl) !important;
+            border-radius: 3px;
+        }
+
+        .current-result {
+            background: rgba(201, 168, 76, 0.35) !important;
+            animation: pulse 1.5s infinite;
+            border-radius: 3px;
+        }
+
+        .verses-paragraph.compact .verse-text-inline {
+            display: inline;
+        }
+
+        .verses-paragraph.compact .verse-inline {
+            display: inline;
+        }
+
+        /* ============ INDICADORES DE CAPÍTULO ============ */
+        .chapter-start-indicator {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border2);
+        }
+
+        .chapter-start-label {
+            color: var(--gold);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: var(--surface);
+            padding: 5px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--border2);
+        }
+
+        /* Letra capitular (primeira letra grande) */
+        .first-verse {
+            display: inline;
+        }
+
+        .drop-cap {
+            float: left;
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 0.8;
+            margin-right: 8px;
+            margin-top: 2px;
+            color: var(--gold);
+            font-family: 'Georgia', 'Times New Roman', serif;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Indicador de fim de capítulo */
+        .chapter-end-indicator {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 2px solid var(--border2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .chapter-end-symbol {
+            color: var(--gold);
+            font-size: 1.2rem;
+        }
+
+        .chapter-end-label {
+            color: var(--text3);
+            font-size: 0.75rem;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        /* Botões de navegação de capítulo */
+        .nav-chapter-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg4);
+            color: var(--text2);
+            border: 1px solid var(--border);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .nav-chapter-btn:hover {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            border-color: var(--border2);
+        }
+
+        .nav-chapter-btn:active {
+            transform: scale(0.9);
+        }
+
+        .nav-chapter-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-chapter-btn:disabled:hover {
+            background: var(--bg4);
+            color: var(--text2);
+            border-color: var(--border);
+        }
+
+        /* ============ INDICADORES DE PARÁGRAFO ============ */
+        .verse-inline.paragraph-start {
+            display: block;
+            margin-top: 12px;
+            text-indent: 0;
+        }
+
+        .verse-inline.paragraph-start::before {
+            content: '';
+            display: block;
+            height: 8px;
+        }
+
+        .paragraph-marker {
+            color: var(--gold);
+            font-size: 0.6rem;
+            margin-right: 6px;
+            vertical-align: middle;
+            opacity: 0.6;
+        }
+
+        /* Alternar visibilidade dos marcadores */
+        .show-paragraph-markers .paragraph-marker {
+            opacity: 1;
+        }
+
+        .hide-paragraph-markers .paragraph-marker {
+            opacity: 0;
+        }
+
+        /* ============ CONTROLES DE ZOOM ============ */
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--bg4);
+            border-radius: var(--radius-sm);
+            padding: 3px 6px;
+            border: 1px solid var(--border);
+        }
+
+        .zoom-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--text2);
+            border: none;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zoom-btn:hover {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+        }
+
+        .zoom-btn:active {
+            transform: scale(0.9);
+        }
+
+        .zoom-level {
+            color: var(--text3);
+            font-size: 0.7rem;
+            min-width: 36px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .zoom-level:hover {
+            color: var(--gold-light);
+        }
+
+        .verses-paragraph {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 18px;
+            line-height: 2.2;
+            text-align: justify;
+            font-size: 95%;
+            color: var(--text);
+            transition: font-size 0.3s ease;
+        }
+
+        /* ============ FUNDO ALTERNADO PARA PARÁGRAFOS ============ */
+        .paragraph-block {
+            display: block;
+            padding: 8px 12px;
+            margin: 2px 0;
+            border-radius: var(--radius-sm);
+            transition: background 0.3s;
+        }
+
+        .paragraph-block.odd {
+            background: rgba(201, 168, 76, 0.03);
+        }
+
+        .paragraph-block.even {
+            background: rgba(201, 168, 76, 0.06);
+        }
+
+        .paragraph-block:hover {
+            background: rgba(201, 168, 76, 0.12) !important;
+        }
+
+        /* Ajuste para manter o texto fluido dentro do bloco */
+        .paragraph-block .verse-inline {
+            display: inline;
+        }
+
+        .paragraph-block .paragraph-marker {
+            color: var(--gold);
+            font-size: 0.6rem;
+            margin-right: 6px;
+            vertical-align: middle;
+            opacity: 0.5;
+        }
+
+        /* ============ BOTÃO VOLTAR AO TOPO ============ */
+        .back-to-top-container {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+        }
+
+        .back-to-top-btn {
+            background: var(--bg4);
+            color: var(--text2);
+            border: 1px solid var(--border2);
+            padding: 10px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-to-top-btn:hover {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            border-color: var(--gold);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .back-to-top-btn:active {
+            transform: translateY(0);
+        }
+
+        /* ============ CRONOLOGIA ============ */
+        .cronologia-view {
+            padding: 15px;
+        }
+
+        .cronologia-container {
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        .cronologia-header {
+            text-align: center;
+            padding: 20px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .cronologia-header h2 {
+            color: var(--gold);
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .cronologia-header p {
+            color: var(--text3);
+            font-size: 0.85rem;
+        }
+
+        .cronologia-section {
+            margin-bottom: 25px;
+        }
+
+        .cronologia-section-title {
+            color: var(--gold-light);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border2);
+            letter-spacing: 0.5px;
+        }
+
+        .cronologia-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+
+        .cronologia-card:hover {
+            border-color: var(--border2);
+        }
+
+        .cronologia-card-title {
+            color: var(--gold);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cronologia-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .cronologia-item {
+            color: var(--text2);
+            font-size: 0.82rem;
+            padding: 4px 0 4px 15px;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .cronologia-item::before {
+            content: '•';
+            color: var(--gold);
+            position: absolute;
+            left: 0;
+            font-size: 1rem;
+        }
+
+        .cronologia-figuras {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .cronologia-tag {
+            background: var(--bg4);
+            color: var(--gold-light);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            border: 1px solid var(--border);
+        }
+
+        .cronologia-timeline-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .cronologia-rei {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            background: var(--bg4);
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+        }
+
+        .rei-nome {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .rei-periodo {
+            color: var(--text3);
+            font-size: 0.75rem;
+        }
+
+        .cronologia-dois-reinos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .cronologia-reino {
+            background: var(--bg4);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+        }
+
+        .reino-titulo {
+            color: var(--gold);
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cronologia-evento-destaque {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            background: rgba(201, 168, 76, 0.1);
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            margin-top: 4px;
+            border-left: 3px solid var(--gold);
+        }
+
+        .evento-data {
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        .evento-data-peq {
+            color: var(--gold);
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }
+
+        .cronologia-fonte {
+            text-align: center;
+            color: var(--text3);
+            font-size: 0.7rem;
+            margin-top: 20px;
+            padding: 10px;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            .cronologia-dois-reinos {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sub-abas da cronologia */
+        .cronologia-tabs {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .cronologia-tab {
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--bg4);
+            color: var(--text2);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .cronologia-tab.active {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+            border-color: var(--border2);
+        }
+
+        .cronologia-tab:hover {
+            border-color: var(--border2);
+            color: var(--gold-light);
+        }
+
+        /* Estilos para os eventos da cronologia dos evangelhos */
+        .cronologia-intersticio {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: var(--highlight);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
+            margin: 15px 0;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .intersticio-icon {
+            font-size: 1.2rem;
+        }
+
+        .intersticio-texto {
+            color: var(--gold-light);
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        .cronologia-evento-item {
+            display: grid;
+            grid-template-columns: 30px 80px 1fr auto;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--bg4);
+            border-radius: var(--radius-sm);
+            margin-bottom: 4px;
+            font-size: 0.82rem;
+            transition: all 0.2s;
+        }
+
+        .cronologia-evento-item:hover {
+            background: var(--highlight);
+            transform: translateX(3px);
+        }
+
+        .evento-numero {
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 0.75rem;
+            text-align: center;
+            background: var(--bg3);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .evento-referencia {
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
+
+        .evento-descricao {
+            color: var(--text);
+            font-size: 0.82rem;
+        }
+
+        .evento-paralelos {
+            color: var(--text3);
+            font-size: 0.7rem;
+            background: var(--bg3);
+            padding: 2px 8px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+            .cronologia-evento-item {
+                grid-template-columns: 25px 65px 1fr;
+            }
+
+            .evento-paralelos {
+                grid-column: 2 / -1;
+                margin-top: 4px;
+            }
+        }
+
+        /* ============ ABA DO DICIONÁRIO ============ */
+        .dictionary-view {
+            padding: 0;
+        }
+
+        .dictionary-page-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px 15px;
+        }
+
+        .dictionary-hero {
+            text-align: center;
+            padding: 30px 20px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .dictionary-hero h2 {
+            color: var(--gold);
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        .dictionary-hero p {
+            color: var(--text3);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .dictionary-results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .dictionary-results-header {
+            color: var(--text2);
+            font-size: 0.85rem;
+            padding: 10px 15px;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .dictionary-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            transition: all 0.3s;
+        }
+
+        .dictionary-card:hover {
+            border-color: var(--border2);
+            background: var(--highlight);
+        }
+
+        .dictionary-card-term {
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .dictionary-card-definition {
+            color: var(--text2);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        /* Categorias e referências do dicionário */
+        .dictionary-category {
+            background: var(--bg4);
+            color: var(--text3);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            margin-left: 8px;
+            font-weight: normal;
+            vertical-align: middle;
+        }
+
+        .dictionary-reference {
+            color: var(--gold);
+            font-size: 0.78rem;
+            margin-top: 6px;
+            font-weight: bold;
+        }
+
+        .dictionary-verse {
+            color: var(--text2);
+            font-size: 0.8rem;
+            font-style: italic;
+            margin-top: 6px;
+            padding: 8px 12px;
+            background: var(--bg4);
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--gold);
+            line-height: 1.5;
+        }
+
+        .dict-source {
+            color: var(--text3);
+            font-size: 0.7rem;
+            font-weight: normal;
+        }
+
+        /* ============ DETECTOR DE EMOÇÕES ============ */
+        .emotion-detector {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 380px;
+            max-width: 90vw;
+            background: var(--surface);
+            border: 2px solid var(--border2);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            z-index: 500;
+            display: block;
+        }
+
+        .emotion-detector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg2);
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        .emotion-detector-title {
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .emotion-close-btn {
+            background: none;
+            border: none;
+            color: var(--text3);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        .emotion-close-btn:hover {
+            color: var(--text);
+        }
+
+        .emotion-input-area {
+            padding: 12px;
+        }
+
+        .emotion-textarea {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg4);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.85rem;
+            resize: vertical;
+        }
+
+        .emotion-textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .emotion-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .emotion-analyze-btn,
+        .emotion-clear-btn {
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .emotion-analyze-btn {
+            background: var(--gold-dark);
+            color: var(--gold-light);
+        }
+
+        .emotion-analyze-btn:hover {
+            background: var(--gold);
+            color: var(--bg);
+        }
+
+        .emotion-clear-btn {
+            background: var(--bg4);
+            color: var(--text2);
+        }
+
+        .emotion-clear-btn:hover {
+            background: var(--fav);
+            color: white;
+        }
+
+        .emotion-results {
+            padding: 0 12px 12px;
+        }
+
+        .emotion-placeholder {
+            text-align: center;
+            color: var(--text3);
+            font-size: 0.8rem;
+            padding: 15px;
+        }
+
+        .emotion-neutral {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .emotion-neutral-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .emotion-hint {
+            color: var(--text3);
+            font-size: 0.7rem;
+            margin-top: 6px;
+        }
+
+        .emotion-dominant {
+            background: var(--bg4);
+            border-left: 4px solid;
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .emotion-dominant-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .emotion-dominant-emoji {
+            font-size: 1.5rem;
+        }
+
+        .emotion-dominant-label {
+            color: var(--text);
+            font-weight: bold;
+            font-size: 0.95rem;
+            flex: 1;
+        }
+
+        .emotion-dominant-score {
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .emotion-dominant-words {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .emotion-word-tag {
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+        }
+
+        .emotion-others {
+            margin-bottom: 10px;
+        }
+
+        .emotion-others-title {
+            color: var(--text3);
+            font-size: 0.75rem;
+            margin-bottom: 6px;
+        }
+
+        .emotion-bar-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .emotion-bar-emoji {
+            font-size: 0.9rem;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .emotion-bar-label {
+            color: var(--text2);
+            font-size: 0.75rem;
+            min-width: 60px;
+        }
+
+        .emotion-bar-container {
+            flex: 1;
+            height: 6px;
+            background: var(--bg4);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .emotion-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .emotion-bar-score {
+            color: var(--text3);
+            font-size: 0.7rem;
+            min-width: 30px;
+            text-align: right;
+        }
+
+        .emotion-total {
+            text-align: center;
+            color: var(--text3);
+            font-size: 0.7rem;
+            padding: 8px;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 480px) {
+            .emotion-detector {
+                bottom: 20px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-top">
+                <h1>📖 Sola Verbo</h1>
+                <span class="header-verse">"Porque a palavra de Deus é viva e eficaz..."
+                    <small>Hb 4:12</small></span>
+            </div>
+            <div class="search-filters">
+                <select id="version-selector" class="filter-select version-select">
+                    <option value="ACF">ACF</option>
+                    <option value="ARA">ARA</option>
+                    <option value="ARC">ARC</option>
+                    <option value="AS21">AS21</option>
+                    <option value="JFAA">JFAA</option>
+                    <option value="KJA">KJA</option>
+                    <option value="KJF">KJF</option>
+                    <option value="NAA">NAA</option>
+                    <option value="NBV">NBV</option>
+                    <option value="NTLH">NTLH</option>
+                    <option value="NVI">NVI</option>
+                    <option value="NVT">NVT</option>
+                    <option value="TB">TB</option>
+                </select>
+                <select id="filter-testament" class="filter-select">
+                    <option value="all">Toda a Bíblia</option>
+                    <option value="old">Antigo Testamento</option>
+                    <option value="new">Novo Testamento</option>
+                </select>
+                <select id="filter-book" class="filter-select">
+                    <option value="all">Todos os livros</option>
+                </select>
+                <select id="filter-chapter" class="filter-select" disabled>
+                    <option value="all">Todos os capítulos</option>
+                </select>
+                <select id="filter-verse" class="filter-select" disabled>
+                    <option value="all">Todos os versículos</option>
+                </select>
+
+                <button id="home-button" class="action-button" title="Início">🏠</button>
+                <button id="favorites-button" class="action-button" title="Favoritos">⭐</button>
+            </div>
+        </header>
+
+        <nav class="nav-menu">
+            <button class="nav-item active" data-tab="old">Antigo
+                Testamento</button>
+            <button class="nav-item" data-tab="new">Novo Testamento</button>
+            <button class="nav-item" data-tab="dictionary">📚
+                Dicionário</button>
+            <button class="nav-item" data-tab="cronologia">⏳
+                Cronologia</button>
+            <button class="nav-item" data-tab="search">🔍 Busca</button>
+            <button class="nav-item" data-tab="compare">📋 Comparar</button>
+            <button class="nav-item" id="emotion-tab-btn" onclick="toggleEmotionDetector()">🎭 Emoção</button>
+        </nav>
+
+        <main class="main-content">
+            <!-- Lista de Livros -->
+            <div id="book-list" class="book-list">
+                <div class="loading">Carregando livros</div>
+            </div>
+
+            <!-- Aba de Cronologia -->
+            <div id="cronologia-view" class="cronologia-view" style="display:none;">
+                <div class="cronologia-container">
+                    <div class="cronologia-header">
+                        <h2>⏳ Cronologia Bíblica</h2>
+                        <p>Linha do tempo dos principais eventos
+                            bíblicos</p>
+                        <div class="cronologia-tabs">
+                            <button class="cronologia-tab active" data-cron="geral">📜 Cronologia
+                                Geral</button>
+                            <button class="cronologia-tab" data-cron="evangelhos">✝️
+                                Evangelhos</button>
+                        </div>
+                    </div>
+                    <div id="cronologia-content" class="cronologia-content">
+                        <div class="loading">Carregando cronologia</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conteúdo do Capítulo -->
+            <div id="chapter-content" class="chapter-content" style="display:none;">
+                <div class="chapter-header">
+                    <button id="back-button" class="back-button">←
+                        Voltar</button>
+                    <button id="prev-chapter-btn" class="nav-chapter-btn" title="Capítulo anterior">◀</button>
+                    <h2 id="chapter-title"></h2>
+                    <button id="next-chapter-btn" class="nav-chapter-btn" title="Próximo capítulo">▶</button>
+                    <div class="zoom-controls">
+                        <button id="zoom-out-btn" class="zoom-btn" title="Diminuir texto">A-</button>
+                        <span id="zoom-level" class="zoom-level">100%</span>
+                        <button id="zoom-in-btn" class="zoom-btn" title="Aumentar texto">A+</button>
+                        <button id="zoom-reset-btn" class="zoom-btn" title="Restaurar tamanho">↺</button>
+                    </div>
+                    <div class="audio-controls">
+                        <button id="play-chapter" class="audio-button" title="Ouvir capítulo">🔊</button>
+                        <button id="pause-chapter" class="audio-button" title="Pausar" style="display:none;">⏸️</button>
+                        <button id="stop-chapter" class="audio-button" title="Parar" style="display:none;">⏹️</button>
+                        <select id="audio-speed" class="audio-speed" title="Velocidade">
+                            <option value="0.5">0.5x</option>
+                            <option value="0.75">0.75x</option>
+                            <option value="1" selected>1x</option>
+                            <option value="1.25">1.25x</option>
+                            <option value="1.5">1.5x</option>
+                            <option value="2">2x</option>
+                        </select>
+                    </div>
+                    <div class="search-results-nav" style="display:none;">
+                        <button id="prev-result" class="nav-result">↑</button>
+                        <span id="result-counter">0 de 0</span>
+                        <button id="next-result" class="nav-result">↓</button>
+                        <button id="show-occurrences" class="occurrences-button">📊</button>
+                        <button id="clear-search" class="clear-search-button">✕ Limpar</button>
+                        <span class="search-info" id="search-info"></span>
+                    </div>
+                </div>
+                <div id="verses-container"></div>
+            </div>
+
+            <!-- Aba de Busca -->
+            <div id="search-view" class="search-view" style="display:none;">
+                <div class="search-page-container">
+                    <div class="search-hero" id="search-hero">
+                        <h2>🔍 Busca na Bíblia</h2>
+                        <p>Pesquise palavras, frases ou temas em toda a
+                            Escritura</p>
+                        <div class="search-bar-large">
+                            <input type="text" id="search-input-main" class="search-input-large"
+                                placeholder="Digite sua busca..." autocomplete="off">
+                            <div id="search-history" class="search-history"></div>
+                            <button id="search-button-main" class="search-button-large">🔍
+                                Buscar</button>
+                        </div>
+
+                        <div class="search-actions-bar">
+                            <!-- <button id="home-button" class="action-button" title="Início">🏠</button> -->
+                            <!-- <button id="favorites-button" class="action-button" title="Favoritos">⭐</button> -->
+                            <!-- <button id="dictionary-button" class="action-button" title="Dicionário">📚</button> -->
+                            <!-- <button id="scroll-top-button" class="action-button" title="Voltar ao topo">⬆️</button> -->
+                        </div>
+
+                    </div>
+
+                    <div id="search-results-page" class="search-results-page" style="display:none;">
+                        <div class="search-results-header">
+                            <button id="back-from-results" class="back-button">← Nova Busca</button>
+                            <h2>Resultados da Busca</h2>
+                            <div class="search-results-summary" id="search-results-summary"></div>
+                        </div>
+                        <div class="search-results-layout">
+                            <aside class="search-results-sidebar" id="search-results-sidebar">
+                                <h3>📊 Ocorrências por Livro</h3>
+                                <div id="results-occurrences-list"></div>
+                            </aside>
+                            <div class="search-results-main" id="search-results-main">
+                                <div id="results-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba de Comparação -->
+            <div id="compare-view-full" class="compare-view-full" style="display:none;">
+                <div class="compare-controls">
+                    <div class="compare-control-item">
+                        <label>Versão 1:</label>
+                        <select id="compare-version-1" class="filter-select">
+                            <option value="ACF">ACF</option>
+                            <option value="ARA">ARA</option>
+                            <option value="ARC">ARC</option>
+                            <option value="AS21">AS21</option>
+                            <option value="JFAA">JFAA</option>
+                            <option value="KJA">KJA</option>
+                            <option value="KJF">KJF</option>
+                            <option value="NAA">NAA</option>
+                            <option value="NBV">NBV</option>
+                            <option value="NTLH">NTLH</option>
+                            <option value="NVI">NVI</option>
+                            <option value="NVT">NVT</option>
+                            <option value="TB">TB</option>
+                        </select>
+                    </div>
+                    <div class="compare-control-item">
+                        <label>Livro:</label>
+                        <select id="compare-book" class="filter-select">
+                            <option value>Selecione um livro</option>
+                        </select>
+                    </div>
+                    <div class="compare-control-item">
+                        <label>Capítulo:</label>
+                        <select id="compare-chapter" class="filter-select" disabled>
+                            <option value>Selecione</option>
+                        </select>
+                    </div>
+                    <div class="compare-control-item">
+                        <label>Versão 2:</label>
+                        <select id="compare-version-2" class="filter-select">
+                            <option value="ACF">ACF</option>
+                            <option value="ARA" selected>ARA</option>
+                            <option value="ARC">ARC</option>
+                            <option value="AS21">AS21</option>
+                            <option value="JFAA">JFAA</option>
+                            <option value="KJA">KJA</option>
+                            <option value="KJF">KJF</option>
+                            <option value="NAA">NAA</option>
+                            <option value="NBV">NBV</option>
+                            <option value="NTLH">NTLH</option>
+                            <option value="NVI">NVI</option>
+                            <option value="NVT">NVT</option>
+                            <option value="TB">TB</option>
+                        </select>
+                    </div>
+                    <button id="compare-btn-go" class="compare-go-btn">🔄
+                        Comparar</button>
+                </div>
+                <div class="compare-panes">
+                    <div class="compare-pane-full" id="compare-pane-1">
+                        <div class="compare-pane-header">Selecione um livro
+                            e capítulo</div>
+                    </div>
+                    <div class="compare-pane-full" id="compare-pane-2">
+                        <div class="compare-pane-header">Selecione um livro
+                            e capítulo</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba do Dicionário -->
+            <div id="dictionary-view" class="dictionary-view" style="display:none;">
+                <div class="dictionary-page-container">
+                    <div class="dictionary-hero">
+                        <h2>📚 Dicionário Bíblico</h2>
+                        <p>Pesquise termos, nomes e conceitos bíblicos</p>
+                        <div class="search-bar-large">
+                            <input type="text" id="dictionary-search-main" class="search-input-large"
+                                placeholder="Digite um termo..." autocomplete="off">
+                            <button id="dictionary-search-btn" class="search-button-large">🔍
+                                Buscar</button>
+                        </div>
+                    </div>
+                    <div id="dictionary-results-main" class="dictionary-results-container"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modal de Nota -->
+        <div id="note-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>📝 Nota - <span id="note-verse-ref"></span></h3>
+                    <button class="close-button"
+                        onclick="document.getElementById('note-modal').style.display='none'">×</button>
+                </div>
+                <div style="padding:15px;">
+                    <textarea id="note-textarea" class="note-textarea"
+                        placeholder="Escreva sua nota aqui..."></textarea>
+                    <button id="save-note-btn" class="save-note-btn">💾
+                        Salvar Nota</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Referências Cruzadas -->
+        <div id="crossref-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>🔗 Referências Cruzadas</h3>
+                    <button class="close-button"
+                        onclick="document.getElementById('crossref-modal').style.display='none'">×</button>
+                </div>
+                <div id="crossref-list" class="favorites-list"></div>
+            </div>
+        </div>
+
+        <!-- Modal de Favoritos -->
+        <div id="favorites-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>⭐ Versículos Favoritos</h3>
+                    <button id="close-favorites" class="close-button">×</button>
+                </div>
+                <div id="favorites-list" class="favorites-list"></div>
+            </div>
+        </div>
+
+        <!-- Modal de Ocorrências -->
+        <div id="occurrences-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>📊 Ocorrências por Livro</h3>
+                    <button id="close-occurrences" class="close-button">×</button>
+                </div>
+                <div id="occurrences-list" class="occurrences-list"></div>
+                <div id="occurrences-total" class="occurrence-total"></div>
+            </div>
+        </div>
+
+        <!-- Modal do Dicionário -->
+        <div id="dictionary-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>📚 Dicionário Bíblico</h3>
+                    <button id="close-dictionary" class="close-button">×</button>
+                </div>
+                <div style="padding:15px;">
+                    <input type="text" id="dictionary-search" class="search-input" placeholder="Buscar termo..."
+                        style="width:100%;margin-bottom:10px;">
+                    <div id="dictionary-results" class="favorites-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Conteúdo (Sobre, Contato, Notícias, Doar) -->
+        <div id="content-modal" class="modal" style="display:none;">
+            <div class="modal-content" style="max-width:650px;">
+                <div class="modal-header">
+                    <h3 id="content-title"></h3>
+                    <button class="close-button" onclick="closeContentPage()">×</button>
+                </div>
+                <div id="content-body" class="content-page-wrapper"></div>
+            </div>
+        </div>
+
+        <!-- Rodapé -->
+        <footer class="app-footer">
+            <div class="footer-container">
+                <div class="footer-top">
+                    <div class="footer-col">
+                        <h4>📖 Sola Verbo</h4>
+                        <p>Bíblia de Estudo com ferramentas para
+                            aprofundamento nas Escrituras Sagradas.</p>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Navegação</h4>
+                        <ul>
+                            <li><a href="#" onclick="switchTab('old')">Antigo
+                                    Testamento</a></li>
+                            <li><a href="#" onclick="switchTab('new')">Novo
+                                    Testamento</a></li>
+                            <li><a href="#" onclick="switchTab('dictionary')">📚
+                                    Dicionário</a></li>
+                            <li><a href="#" onclick="switchTab('cronologia')">⏳
+                                    Cronologia</a></li>
+                            <li><a href="#" onclick="switchTab('search')">🔍
+                                    Busca</a></li>
+                            <li><a href="#" onclick="switchTab('compare')">📋
+                                    Comparar</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Links</h4>
+                        <ul>
+                            <li><a href="#" onclick="openContentPage('sobre')">Sobre</a></li>
+                            <li><a href="#" onclick="openContentPage('contato')">Contato</a></li>
+                            <li><a href="#" onclick="openContentPage('noticias')">Notícias</a></li>
+                            <li><a href="#" onclick="openContentPage('doar')">Doar</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Contato</h4>
+                        <ul class="footer-contact">
+                            <li>👤 Jairo Caetano</li>
+                            <li>✉️ emailcaetano@email.com</li>
+                            <li>📍 Araçatuba - SP</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <span>© 2026 Sola Verbo</span>
+                    <span class="footer-separator">|</span>
+                    <span>Todos os direitos reservados</span>
+                </div>
+            </div>
+        </footer>
+    </div> <!-- Fim do app-container -->
+
+    <!-- Scripts -->
+    <!-- <script src="js/config.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/results.js"></script>
+    <script src="js/study.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/pages.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/cronologia.js"></script>
+    <script src="js/emotion.js"></script> -->
+
+    <script>
+        // ============ CONFIGURAÇÃO DOS LIVROS POR CATEGORIA ============
+        const BIBLE_STRUCTURE = {
+            old: {
+                "Pentateuco": ["Gênesis", "Êxodo", "Levítico", "Números", "Deuteronômio"],
+                "Históricos": ["Josué", "Juízes", "Rute", "1 Samuel", "2 Samuel", "1 Reis", "2 Reis", "1 Crônicas", "2 Crônicas", "Esdras", "Neemias", "Ester"],
+                "Poéticos e Sabedoria": ["Jó", "Salmos", "Provérbios", "Eclesiastes", "Cantares"],
+                "Profetas Maiores": ["Isaías", "Jeremias", "Lamentações", "Ezequiel", "Daniel"],
+                "Profetas Menores": ["Oseias", "Joel", "Amós", "Obadias", "Jonas", "Miqueias", "Naum", "Habacuque", "Sofonias", "Ageu", "Zacarias", "Malaquias"]
+            },
+            new: {
+                "Evangelhos": ["Mateus", "Marcos", "Lucas", "João"],
+                "Histórico": ["Atos"],
+                "Epístolas de Paulo": ["Romanos", "1 Coríntios", "2 Coríntios", "Gálatas", "Efésios", "Filipenses", "Colossenses", "1 Tessalonicenses", "2 Tessalonicenses", "1 Timóteo", "2 Timóteo", "Tito", "Filemom", "Hebreus"],
+                "Epístolas Gerais": ["Tiago", "1 Pedro", "2 Pedro", "1 João", "2 João", "3 João", "Judas"],
+                "Profecia": ["Apocalipse"]
+            }
+        };
+
+        const BIBLE_BOOKS = {
+            old: Object.values(BIBLE_STRUCTURE.old).flat(),
+            new: Object.values(BIBLE_STRUCTURE.new).flat()
+        };
+
+        const TSK_BOOK_MAP = {
+            'GEN': 'Gênesis', 'EXO': 'Êxodo', 'LEV': 'Levítico', 'NUM': 'Números', 'DEU': 'Deuteronômio',
+            'JOS': 'Josué', 'JDG': 'Juízes', 'RUT': 'Rute', '1SA': '1 Samuel', '2SA': '2 Samuel',
+            '1KI': '1 Reis', '2KI': '2 Reis', '1CH': '1 Crônicas', '2CH': '2 Crônicas',
+            'EZR': 'Esdras', 'NEH': 'Neemias', 'EST': 'Ester', 'JOB': 'Jó',
+            'PSA': 'Salmos', 'PRO': 'Provérbios', 'ECC': 'Eclesiastes', 'SNG': 'Cantares',
+            'ISA': 'Isaías', 'JER': 'Jeremias', 'LAM': 'Lamentações', 'EZK': 'Ezequiel',
+            'DAN': 'Daniel', 'HOS': 'Oseias', 'JOL': 'Joel', 'AMO': 'Amós',
+            'OBA': 'Obadias', 'JON': 'Jonas', 'MIC': 'Miqueias', 'NAH': 'Naum',
+            'HAB': 'Habacuque', 'ZEP': 'Sofonias', 'HAG': 'Ageu', 'ZEC': 'Zacarias', 'MAL': 'Malaquias',
+            'MAT': 'Mateus', 'MAR': 'Marcos', 'LUK': 'Lucas', 'JOH': 'João', 'ACT': 'Atos',
+            'ROM': 'Romanos', '1CO': '1 Coríntios', '2CO': '2 Coríntios', 'GAL': 'Gálatas',
+            'EPH': 'Efésios', 'PHP': 'Filipenses', 'COL': 'Colossenses',
+            '1TH': '1 Tessalonicenses', '2TH': '2 Tessalonicenses',
+            '1TI': '1 Timóteo', '2TI': '2 Timóteo', 'TIT': 'Tito', 'PHM': 'Filemom',
+            'HEB': 'Hebreus', 'JAS': 'Tiago', '1PE': '1 Pedro', '2PE': '2 Pedro',
+            '1JO': '1 João', '2JO': '2 João', '3JO': '3 João', 'JUD': 'Judas', 'REV': 'Apocalipse'
+        };
+
+        // ============ ESTADO GLOBAL ============
+        const appState = {
+            currentVersion: 'ACF', compareVersion: 'ARA', currentTestament: 'old',
+            currentBook: null, currentChapter: null, bibleData: null, compareData: null,
+            searchResults: [], currentSearchIndex: -1, compareMode: false,
+            favorites: JSON.parse(localStorage.getItem('bibleFavorites') || '[]'),
+            searchHistory: JSON.parse(localStorage.getItem('searchHistory') || '[]'),
+            notes: JSON.parse(localStorage.getItem('bibleNotes') || '{}'),
+            markers: JSON.parse(localStorage.getItem('bibleMarkers') || '{}'),
+            crossrefDB: {},
+            crossrefLoaded: false,
+            currentSearchTerm: '',
+            searchFilter: { testament: 'all', book: 'all', chapter: 'all', verse: 'all' }
+        };
+
+        // ============ FUNÇÕES UTILITÁRIAS ============
+        function findBook(bookName, data = appState.bibleData) {
+            if (!data || !data.books) return null;
+            const n = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, '').trim();
+            const ns = n(bookName);
+            let book = data.books.find(b => n(b.name) === ns || (b.abbrev && n(b.abbrev) === ns));
+            if (book) return book;
+            book = data.books.find(b => n(b.name).includes(ns) || ns.includes(n(b.name)) || (b.abbrev && n(b.abbrev).includes(ns)));
+            if (book) return book;
+            if (ns.includes('cant') || ns.includes('cantic')) {
+                book = data.books.find(b => n(b.name).includes('cant') || n(b.name).includes('cantic'));
+                if (book) return book;
+            }
+            return null;
+        }
+
+        function getTestament(bookName) { return BIBLE_BOOKS.old.includes(bookName) ? 'old' : 'new'; }
+        function getVerseKey(book, chapter, verse) { return `${book}-${chapter}-${verse}`; }
+        function escapeRegExp(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+        function isFavorite(book, chapter, verse) { return appState.favorites.some(f => f.book === book && f.chapter === chapter && f.verse === verse); }
+        function saveFavorites() { localStorage.setItem('bibleFavorites', JSON.stringify(appState.favorites)); }
+
+        // ============ ZOOM ============
+        let currentZoom = parseInt(localStorage.getItem('bibleZoom') || '100');
+        function applyZoom(level) {
+            currentZoom = Math.max(60, Math.min(200, level));
+            const paragraph = document.querySelector('.verses-paragraph');
+            if (paragraph) paragraph.style.fontSize = `${currentZoom}%`;
+            const zoomLevel = document.getElementById('zoom-level');
+            if (zoomLevel) zoomLevel.textContent = `${currentZoom}%`;
+            localStorage.setItem('bibleZoom', currentZoom.toString());
+        }
+
+        // ============ DADOS ============
+        function convertBibleFormat(jsonData, version) {
+            if (jsonData.version && jsonData.books && Array.isArray(jsonData.books)) return jsonData;
+            if (Array.isArray(jsonData)) {
+                const vn = { ACF: 'Almeida Corrigida Fiel', ARA: 'Almeida Revista e Atualizada', ARC: 'Almeida Revista e Corrigida', AS21: 'Almeida Século 21', JFAA: 'João Ferreira de Almeida Atualizada', KJA: 'King James Atualizada', KJF: 'King James Fiel', NAA: 'Nova Almeida Atualizada', NBV: 'Nova Bíblia Viva', NTLH: 'Nova Tradução na Linguagem de Hoje', NVI: 'Nova Versão Internacional', NVT: 'Nova Versão Transformadora', TB: 'Tradução Brasileira' };
+                return { version: version, name: vn[version] || `Versão ${version}`, books: jsonData.map(b => ({ name: b.name || b.abbrev || 'Desconhecido', abbrev: b.abbrev || b.name, chapters: b.chapters || [] })) };
+            }
+            return jsonData;
+        }
+
+        async function loadBibleData(version) {
+            document.getElementById('book-list').innerHTML = '<div class="loading">Carregando versão</div>';
+            const response = await fetch(`data/${version}.json`);
+            if (!response.ok) throw new Error(`Erro ao carregar versão ${version}`);
+            let jsonData = await response.json();
+            jsonData = convertBibleFormat(jsonData, version);
+            appState.bibleData = jsonData;
+            appState.currentVersion = version;
+        }
+
+        async function loadCompareVersion() {
+            try {
+                const response = await fetch(`data/${appState.compareVersion}.json`);
+                if (response.ok) appState.compareData = convertBibleFormat(await response.json(), appState.compareVersion);
+            } catch (e) { }
+        }
+
+        function getBookMetadata(bookName) {
+            if (!appState.bibleData || !appState.bibleData.books) return null;
+            const book = findBook(bookName);
+            if (!book) return null;
+            return { name: book.name || bookName, chapters: book.chapters ? (Array.isArray(book.chapters) ? book.chapters : Object.values(book.chapters)).length : 0, testament: getTestament(bookName) };
+        }
+
+        // ============ REFERÊNCIAS CRUZADAS ============
+        function tskToKey(tskRef) {
+            const parts = tskRef.trim().split(/\s+/);
+            if (parts.length < 3) return null;
+            const bookCode = parts[0].toUpperCase();
+            const bookName = TSK_BOOK_MAP[bookCode];
+            if (!bookName) return null;
+            return `${bookName}-${parseInt(parts[1])}-${parseInt(parts[2])}`;
+        }
+
+        function loadCrossrefFromStorage() { return false; }
+
+        async function loadCrossrefData() {
+            if (appState.crossrefLoaded) return;
+            console.log('📚 Carregando referências cruzadas...');
+            let totalRefs = 0;
+            for (let i = 1; i <= 32; i++) {
+                try {
+                    const response = await fetch(`data/crossrefs/${i}.json`);
+                    if (!response.ok) continue;
+                    const data = await response.json();
+                    for (const entry of Object.values(data)) {
+                        if (entry.v && entry.r) {
+                            const sourceKey = tskToKey(entry.v);
+                            if (!sourceKey) continue;
+                            const refs = [];
+                            for (const refStr of Object.values(entry.r)) { const refKey = tskToKey(refStr); if (refKey) refs.push(refKey); }
+                            if (refs.length > 0) { appState.crossrefDB[sourceKey] = refs; totalRefs++; }
+                        }
+                    }
+                } catch (e) { }
+            }
+            appState.crossrefLoaded = true;
+            console.log(`✓ ${totalRefs} versículos com referências (em memória)`);
+        }
+
+        // ============ NAVEGAÇÃO ============
+        function goHome() {
+            appState.currentBook = null; appState.currentChapter = null;
+            document.getElementById('book-list').style.display = 'block';
+            document.getElementById('chapter-content').style.display = 'none';
+            document.getElementById('compare-view-full').style.display = 'none';
+            document.querySelector('.search-results-nav').style.display = 'none';
+            renderBookList();
+        }
+
+        function goBack() {
+            document.getElementById('compare-view-full').style.display = 'none';
+            document.querySelector('.search-results-nav').style.display = 'none';
+            if (appState.currentChapter !== null) { appState.currentChapter = null; renderChapterList(appState.currentBook.name); }
+            else if (appState.currentBook) { appState.currentBook = null; document.getElementById('chapter-content').style.display = 'none'; document.getElementById('book-list').style.display = 'block'; renderBookList(); }
+        }
+
+        function renderBookList() {
+            const bl = document.getElementById('book-list');
+            bl.style.display = 'block'; document.getElementById('chapter-content').style.display = 'none'; bl.innerHTML = '';
+            const categories = BIBLE_STRUCTURE[appState.currentTestament];
+            for (const [category, books] of Object.entries(categories)) {
+                const categoryTitle = document.createElement('div'); categoryTitle.className = 'category-title'; categoryTitle.textContent = category; bl.appendChild(categoryTitle);
+                const categoryGrid = document.createElement('div'); categoryGrid.className = 'category-grid';
+                books.forEach((book) => {
+                    const meta = getBookMetadata(book); const chaptersCount = meta ? meta.chapters : '?';
+                    const el = document.createElement('div'); el.className = 'book-item';
+                    el.innerHTML = `<div class="book-name">${book}</div><div class="book-chapters">${chaptersCount} cap.</div>`;
+                    el.addEventListener('click', () => { appState.currentBook = { name: book, testament: appState.currentTestament }; renderChapterList(book); });
+                    categoryGrid.appendChild(el);
+                });
+                bl.appendChild(categoryGrid);
+            }
+        }
+
+        function renderChapterList(bookName) {
+            document.getElementById('book-list').style.display = 'none';
+            document.getElementById('chapter-content').style.display = 'block';
+            document.getElementById('compare-view-full').style.display = 'none';
+            const bd = findBook(bookName);
+            if (!bd) { alert(`Livro "${bookName}" não encontrado`); goHome(); return; }
+            const chaptersArray = Array.isArray(bd.chapters) ? bd.chapters : Object.values(bd.chapters);
+            document.getElementById('chapter-title').textContent = `${bd.name} - ${chaptersArray.length} capítulos`;
+            document.getElementById('verses-container').innerHTML = `<div class="chapter-navigation">${Array.from({ length: chaptersArray.length }, (_, i) => `<div class="chapter-link" onclick="loadChapter(${i})">${i + 1}</div>`).join('')}</div>`;
+            appState.currentChapter = null;
+            const prevBtn = document.getElementById('prev-chapter-btn'); const nextBtn = document.getElementById('next-chapter-btn');
+            if (prevBtn) prevBtn.style.display = 'none'; if (nextBtn) nextBtn.style.display = 'none';
+        }
+
+        function isParagraphStart(verseText, previousVerseText = "") {
+            if (!verseText) return false;
+            const text = verseText.trim(); const prev = previousVerseText.trim(); let score = 0;
+            const strongParagraphStarters = [
+                /^E\s+(disse|falou|chamou|havia|aconteceu|sucedeu)/i, /^Então\s/i, /^Depois\s+(destas|disso|disto)/i,
+                /^Ora,\s/i, /^Assim\s+(diz|começou|terminou)/i, /^No\s+(princípio|dia|tempo|ano)/i,
+                /^Naquele\s+tempo/i, /^Naqueles\s+dias/i, /^Aconteceu\s/i, /^Sucedeu\s/i,
+                /^Disse\s+(Deus|Jesus|o Senhor|o SENHOR)/i, /^(disse|falou|respondeu|clamou|perguntou|exclamou|ordenou)\s+/i,
+                /^Haja\s/i, /^Produza\s/i, /^Eis\s+que\s/i, /^Estas\s+(são|foram)/i,
+                /^Bem-aventurado/i, /^Portanto\s/i, /^Tendo\s/i, /^Chegando\s/i, /^Partindo\s/i,
+                /^(filho|filhos)\s+de/i, /^gerou\s/i, /^viveu\s/i, /^morreu\s/i,
+            ];
+            const weakConnectors = /^(e|ou|mas|porém|todavia|contudo|porque|pois|também|assim|desta|deste|para|com|em|no|na|os|as|o|a|um|uma|então)\s/i;
+            for (const pattern of strongParagraphStarters) { if (pattern.test(text)) { score += 3; break; } }
+            if (prev && /[.!?]$/.test(prev)) score += 1;
+            if (prev.endsWith(":")) score += 3;
+            if (/^["'"]/.test(text)) score += 2;
+            if (prev.length > 120 && text.length < 70) score += 1;
+            if (text.length < 90 && (text.includes(";") || text.split(",").length >= 3)) score += 1;
+            if (weakConnectors.test(text)) score -= 2;
+            if (prev && /[.!?]$/.test(prev) && /^[A-ZÀ-Ú]/.test(text)) score += 1;
+            return score >= 3;
+        }
+
+        function loadChapter(chapterIndex) {
+            const bd = findBook(appState.currentBook.name);
+            if (!bd) { alert('Livro não encontrado'); return; }
+            const chaptersArray = Array.isArray(bd.chapters) ? bd.chapters : Object.values(bd.chapters);
+            if (!chaptersArray[chapterIndex]) { alert('Capítulo não encontrado'); return; }
+            const chapterVerses = chaptersArray[chapterIndex];
+            appState.currentChapter = chapterIndex;
+            document.getElementById('chapter-title').textContent = `${bd.name} ${chapterIndex + 1}`;
+            const vc = document.getElementById('verses-container'); vc.innerHTML = '';
+            const toolbarDiv = document.createElement('div'); toolbarDiv.className = 'paragraph-toolbar';
+            toolbarDiv.innerHTML = `<button class="toolbar-btn" onclick="toggleParagraphMarkers()" title="Mostrar/Esconder marcadores">¶</button><button class="toolbar-btn" onclick="toggleMarkerPaletteParagraph()" title="Marca-texto">🖍️</button><div id="marker-palette-paragraph" class="marker-palette" style="display:none;"><div class="marker-color" data-color="yellow" onclick="setMarkerParagraph('yellow')"></div><div class="marker-color" data-color="green" onclick="setMarkerParagraph('green')"></div><div class="marker-color" data-color="blue" onclick="setMarkerParagraph('blue')"></div><div class="marker-color" data-color="pink" onclick="setMarkerParagraph('pink')"></div><div class="marker-color" data-color="orange" onclick="setMarkerParagraph('orange')"></div><span class="marker-clear" onclick="setMarkerParagraph('none')">✕</span></div>`;
+            vc.appendChild(toolbarDiv);
+            const paragraphDiv = document.createElement('div'); paragraphDiv.className = 'verses-paragraph';
+            const chapterStart = document.createElement('div'); chapterStart.className = 'chapter-start-indicator';
+            chapterStart.innerHTML = `<span class="chapter-start-label">Capítulo ${chapterIndex + 1}</span>`; paragraphDiv.appendChild(chapterStart);
+            let currentBlock = null; let blockIndex = 0;
+            chapterVerses.forEach((verse, vi) => {
+                const key = getVerseKey(bd.name, chapterIndex + 1, vi + 1); const mc = appState.markers[key] || '';
+                const prevVerse = vi > 0 ? chapterVerses[vi - 1] : '';
+                if (vi === 0 || isParagraphStart(verse, prevVerse)) { if (vi > 0) blockIndex++; currentBlock = document.createElement('span'); currentBlock.className = `paragraph-block ${blockIndex % 2 === 0 ? 'even' : 'odd'}`; paragraphDiv.appendChild(currentBlock); }
+                const verseSpan = document.createElement('span'); verseSpan.className = 'verse-inline';
+                if (vi > 0 && isParagraphStart(verse, prevVerse)) verseSpan.classList.add('paragraph-start');
+                verseSpan.id = `verse-${vi}`; if (mc) verseSpan.style.background = `var(--marker-${mc})`;
+                const paraMarker = (vi > 0 && isParagraphStart(verse, prevVerse)) ? '<span class="paragraph-marker" title="Início de parágrafo">¶</span>' : '';
+                verseSpan.innerHTML = `${paraMarker}<sup class="verse-number-inline" data-verse="${vi + 1}" onclick="event.stopPropagation(); playVerseAudio(${vi})">${vi + 1}</sup><span class="verse-text-inline">${verse || '&nbsp;'}</span><span class="verse-actions-inline"><button class="verse-action-btn-inline" onclick="event.stopPropagation(); playVerseAudio(${vi})" title="Ouvir">🔊</button><button class="verse-action-btn-inline" onclick="event.stopPropagation(); openNoteModal('${bd.name.replace(/'/g, "\\'")}',${chapterIndex + 1},${vi + 1})" title="Nota">📝</button><button class="verse-action-btn-inline" onclick="event.stopPropagation(); openCrossrefModal('${bd.name.replace(/'/g, "\\'")}',${chapterIndex + 1},${vi + 1})" title="Referências">🔗</button><button class="verse-action-btn-inline" onclick="event.stopPropagation(); toggleFavorite('${bd.name.replace(/'/g, "\\'")}',${chapterIndex + 1},${vi + 1},this)" title="Favorito">${isFavorite(bd.name, chapterIndex + 1, vi + 1) ? '⭐' : '☆'}</button></span>`;
+                currentBlock.appendChild(verseSpan);
+            });
+            const chapterEnd = document.createElement('div'); chapterEnd.className = 'chapter-end-indicator';
+            chapterEnd.innerHTML = `<span class="chapter-end-symbol">❖</span><span class="chapter-end-label">Fim do Capítulo ${chapterIndex + 1}</span>`; paragraphDiv.appendChild(chapterEnd);
+            const backToTopDiv = document.createElement('div'); backToTopDiv.className = 'back-to-top-container';
+            backToTopDiv.innerHTML = `<button class="back-to-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">⬆️ Voltar ao Topo</button>`; paragraphDiv.appendChild(backToTopDiv);
+            vc.appendChild(paragraphDiv);
+            updateChapterNavButtons();
+            const prevBtn = document.getElementById('prev-chapter-btn'); const nextBtn = document.getElementById('next-chapter-btn');
+            if (prevBtn) prevBtn.style.display = 'flex'; if (nextBtn) nextBtn.style.display = 'flex';
+            if (typeof currentZoom !== 'undefined') paragraphDiv.style.fontSize = `${currentZoom}%`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (appState.searchResults.length > 0) highlightSearchResultsParagraph();
+        }
+
+        function loadChapterForSearch(ci) {
+            const bd = findBook(appState.currentBook.name); if (!bd) return;
+            const chaptersArray = Array.isArray(bd.chapters) ? bd.chapters : Object.values(bd.chapters);
+            if (!chaptersArray[ci]) return;
+            appState.currentChapter = ci; document.getElementById('chapter-title').textContent = `${bd.name} ${ci + 1}`;
+            const vc = document.getElementById('verses-container'); vc.innerHTML = '';
+            chaptersArray[ci].forEach((verse, vi) => {
+                const key = getVerseKey(bd.name, ci + 1, vi + 1); const mc = appState.markers[key] || ''; const hn = appState.notes[key] ? true : false;
+                const el = document.createElement('div'); el.className = 'verse-container'; el.id = `verse-${vi}`;
+                if (hn) el.classList.add('verse-has-note'); if (mc) el.style.background = `var(--marker-${mc})`;
+                el.innerHTML = `<div class="verse-number">${vi + 1}</div><div class="verse-text">${verse || '&nbsp;'}${hn ? '<span class="note-indicator">📝</span>' : ''}</div><div class="verse-actions"><button class="verse-action-btn" onclick="event.stopPropagation();openNoteModal('${bd.name.replace(/'/g, "\\'")}',${ci + 1},${vi + 1})">📝</button><button class="verse-action-btn" onclick="event.stopPropagation();toggleFavorite('${bd.name.replace(/'/g, "\\'")}',${ci + 1},${vi + 1},this)">${isFavorite(bd.name, ci + 1, vi + 1) ? '⭐' : '☆'}</button></div>`;
+                vc.appendChild(el);
+            });
+            document.querySelector('.search-results-nav').style.display = 'flex';
+        }
+
+        function navigateChapter(direction) {
+            if (!appState.currentBook || appState.currentChapter === null) return;
+            const bookData = findBook(appState.currentBook.name); if (!bookData) return;
+            const chaptersArray = Array.isArray(bookData.chapters) ? bookData.chapters : Object.values(bookData.chapters);
+            const newChapter = appState.currentChapter + direction;
+            if (newChapter >= 0 && newChapter < chaptersArray.length) loadChapter(newChapter);
+        }
+
+        function updateChapterNavButtons() {
+            const prevBtn = document.getElementById('prev-chapter-btn'); const nextBtn = document.getElementById('next-chapter-btn');
+            if (!appState.currentBook || appState.currentChapter === null) return;
+            const bookData = findBook(appState.currentBook.name); if (!bookData) return;
+            const chaptersArray = Array.isArray(bookData.chapters) ? bookData.chapters : Object.values(bookData.chapters);
+            if (prevBtn) { prevBtn.disabled = appState.currentChapter === 0; prevBtn.style.display = 'flex'; }
+            if (nextBtn) { nextBtn.disabled = appState.currentChapter >= chaptersArray.length - 1; nextBtn.style.display = 'flex'; }
+        }
+
+        // ============ MARCA-TEXTO ============
+        let selectedVerseForMarker = null;
+        function toggleMarkerPaletteParagraph() { const palette = document.getElementById('marker-palette-paragraph'); if (palette) palette.style.display = palette.style.display === 'flex' ? 'none' : 'flex'; }
+        document.addEventListener('click', function (e) { const verseInline = e.target.closest('.verse-inline'); if (verseInline) { document.querySelectorAll('.verse-inline.selected-for-marker').forEach(el => el.classList.remove('selected-for-marker')); verseInline.classList.add('selected-for-marker'); selectedVerseForMarker = verseInline; } });
+        function setMarkerParagraph(color) {
+            if (!selectedVerseForMarker) { alert('Clique em um versículo primeiro para marcá-lo.'); return; }
+            const verseId = selectedVerseForMarker.id; const match = verseId.match(/verse-(\d+)/); if (!match) return;
+            const verseIndex = parseInt(match[1]); const key = getVerseKey(appState.currentBook.name, appState.currentChapter + 1, verseIndex + 1);
+            if (color === 'none') { delete appState.markers[key]; selectedVerseForMarker.style.background = ''; }
+            else { appState.markers[key] = color; selectedVerseForMarker.style.background = `var(--marker-${color})`; }
+            localStorage.setItem('bibleMarkers', JSON.stringify(appState.markers)); document.getElementById('marker-palette-paragraph').style.display = 'none';
+        }
+        function toggleParagraphMarkers() { const paragraph = document.querySelector('.verses-paragraph'); if (!paragraph) return; paragraph.classList.toggle('show-paragraph-markers'); paragraph.classList.toggle('hide-paragraph-markers'); }
+
+        // ============ BUSCA E HIGHLIGHT ============
+        function highlightSearchResultsParagraph() {
+            if (!appState.currentSearchTerm || !appState.searchResults.length) return; clearSearchHighlights();
+            document.querySelectorAll('.verse-text-inline').forEach(el => { const originalText = el.textContent; if (originalText.toLowerCase().includes(appState.currentSearchTerm.toLowerCase())) { el.innerHTML = originalText.replace(new RegExp(`(${escapeRegExp(appState.currentSearchTerm)})`, 'gi'), '<mark>$1</mark>'); el.parentElement.classList.add('verse-highlight'); } });
+            if (appState.currentSearchIndex >= 0) { const cr = appState.searchResults[appState.currentSearchIndex]; const el = document.getElementById(`verse-${cr.verse - 1}`); if (el) { el.classList.remove('verse-highlight'); el.classList.add('current-result'); } }
+            const counter = document.getElementById('result-counter'); if (counter) counter.textContent = `${appState.currentSearchIndex + 1} de ${appState.searchResults.length}`;
+        }
+        function clearSearchHighlights() { document.querySelectorAll('.verse-inline').forEach(el => { el.classList.remove('verse-highlight', 'current-result'); const vt = el.querySelector('.verse-text-inline'); if (vt) vt.innerHTML = vt.textContent; }); }
+
+        // ============ FILTROS ============
+        function updateBookFilter() {
+            const ft = document.getElementById('filter-testament'); const fb = document.getElementById('filter-book');
+            const fc = document.getElementById('filter-chapter'); const fv = document.getElementById('filter-verse');
+            if (!ft || !fb || !fc || !fv) return;
+            const cv = fb.value; fb.innerHTML = '<option value="all">Todos os livros</option>';
+            let books = ft.value === 'all' ? [...BIBLE_BOOKS.old, ...BIBLE_BOOKS.new] : BIBLE_BOOKS[ft.value];
+            books.forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; fb.appendChild(o); });
+            if (cv && books.includes(cv)) fb.value = cv; fb.disabled = false;
+            fc.innerHTML = '<option value="all">Todos os capítulos</option>'; fc.disabled = true; fc.value = 'all';
+            fv.innerHTML = '<option value="all">Todos os versículos</option>'; fv.disabled = true; fv.value = 'all';
+            appState.searchFilter = { testament: ft.value, book: fb.value, chapter: 'all', verse: 'all' };
+        }
+        function updateChapterFilter() {
+            const fb = document.getElementById('filter-book'); const fc = document.getElementById('filter-chapter'); const fv = document.getElementById('filter-verse');
+            if (!fb || !fc || !fv) return;
+            fc.innerHTML = '<option value="all">Todos os capítulos</option>'; fv.innerHTML = '<option value="all">Todos os versículos</option>';
+            if (fb.value !== 'all') { const bd = findBook(fb.value); if (bd && bd.chapters) { const ca = Array.isArray(bd.chapters) ? bd.chapters : Object.values(bd.chapters); for (let i = 1; i <= ca.length; i++) { const o = document.createElement('option'); o.value = i; o.textContent = `Capítulo ${i}`; fc.appendChild(o); } fc.disabled = false; } } else { fc.disabled = true; }
+            fc.value = 'all'; fv.disabled = true; fv.value = 'all'; appState.searchFilter.chapter = 'all'; appState.searchFilter.verse = 'all';
+        }
+        function updateVerseFilter() {
+            const fb = document.getElementById('filter-book'); const fc = document.getElementById('filter-chapter'); const fv = document.getElementById('filter-verse');
+            if (!fb || !fc || !fv) return;
+            fv.innerHTML = '<option value="all">Todos os versículos</option>';
+            if (fb.value !== 'all' && fc.value !== 'all') { const bd = findBook(fb.value); if (bd) { const ca = Array.isArray(bd.chapters) ? bd.chapters : Object.values(bd.chapters); const cv = ca[fc.value - 1]; if (cv && Array.isArray(cv)) { for (let i = 1; i <= cv.length; i++) { const o = document.createElement('option'); o.value = i; o.textContent = `Versículo ${i}`; fv.appendChild(o); } fv.disabled = false; } } } else { fv.disabled = true; }
+            fv.value = 'all'; appState.searchFilter.verse = 'all';
+        }
+        function checkAutoNavigate() {
+            const book = document.getElementById('filter-book')?.value; const chapter = document.getElementById('filter-chapter')?.value; const verse = document.getElementById('filter-verse')?.value;
+            if (!book || !chapter || !verse) return;
+            if (book !== 'all' && chapter !== 'all' && verse !== 'all') { switchTab(getTestament(book)); appState.currentBook = { name: book, testament: getTestament(book) }; loadChapter(parseInt(chapter) - 1); setTimeout(() => { const el = document.getElementById(`verse-${parseInt(verse) - 1}`); if (el) { el.style.background = 'var(--highlight)'; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => el.style.background = '', 2500); } }, 400); }
+            else if (book !== 'all' && chapter !== 'all') { switchTab(getTestament(book)); appState.currentBook = { name: book, testament: getTestament(book) }; loadChapter(parseInt(chapter) - 1); }
+            else if (book !== 'all') { switchTab(getTestament(book)); appState.currentBook = { name: book, testament: getTestament(book) }; renderChapterList(book); }
+        }
+
+        // ============ HISTÓRICO DE BUSCA ============
+        function loadSearchHistory() { const s = localStorage.getItem('searchHistory'); if (s) appState.searchHistory = JSON.parse(s); }
+        function saveSearchHistory() { localStorage.setItem('searchHistory', JSON.stringify(appState.searchHistory)); }
+        function addToSearchHistory(term, total) { appState.searchHistory = appState.searchHistory.filter(i => i.term.toLowerCase() !== term.toLowerCase()); appState.searchHistory.unshift({ term, total, date: new Date().toISOString() }); if (appState.searchHistory.length > 20) appState.searchHistory = appState.searchHistory.slice(0, 20); saveSearchHistory(); renderSearchHistory(); }
+        function removeFromHistory(i) { appState.searchHistory.splice(i, 1); saveSearchHistory(); renderSearchHistory(); }
+        function clearSearchHistory() { appState.searchHistory = []; saveSearchHistory(); renderSearchHistory(); const hd = document.getElementById('search-history'); if (hd) hd.classList.remove('active'); }
+        function renderSearchHistory() { const h = document.getElementById('search-history'); if (!h) return; if (!appState.searchHistory.length) { h.innerHTML = ''; return; } h.innerHTML = appState.searchHistory.map((item, i) => `<div class="search-history-item" onclick="useHistoryTerm('${item.term.replace(/'/g, "\\'")}')"><span class="search-history-term">🔍 ${item.term}</span><span class="search-history-count">${item.total} res.</span><button class="search-history-remove" onclick="event.stopPropagation();removeFromHistory(${i})">×</button></div>`).join('') + '<div class="search-history-clear" onclick="clearSearchHistory()">Limpar histórico</div>'; }
+        function useHistoryTerm(t) { const input = document.getElementById('search-input-main'); if (input) input.value = t; const hd = document.getElementById('search-history'); if (hd) hd.classList.remove('active'); performSearch(); }
+
+        // ============ BUSCA ============
+        function performSearch() {
+            const searchInput = document.getElementById('search-input-main'); if (!searchInput) return;
+            const term = searchInput.value.trim(); if (!term) { alert('Digite um termo'); return; }
+            if (!appState.bibleData?.books) { alert('Carregue uma versão'); return; }
+            appState.searchResults = []; appState.currentSearchIndex = -1; appState.currentSearchTerm = term;
+            const hd = document.getElementById('search-history'); if (hd) hd.classList.remove('active');
+            let totalFound = 0;
+            appState.bibleData.books.forEach(book => { if (!book.chapters) return; const ca = Array.isArray(book.chapters) ? book.chapters : Object.values(book.chapters); ca.forEach((ch, ci) => { if (!Array.isArray(ch)) return; ch.forEach((verse, vi) => { if (typeof verse === 'string' && verse.toLowerCase().includes(term.toLowerCase())) { appState.searchResults.push({ book: book.name, chapter: ci + 1, verse: vi + 1, text: verse, testament: getTestament(book.name) }); totalFound++; } }); }); });
+            addToSearchHistory(term, totalFound);
+            if (totalFound > 0) { const hero = document.getElementById('search-hero'); if (hero) hero.style.display = 'none'; const rp = document.getElementById('search-results-page'); if (rp) rp.style.display = 'flex'; resultsState.filteredResults = [...appState.searchResults]; resultsState.selectedBook = null; renderSearchResultsPage(); }
+            else { alert(`Nenhum resultado para "${term}"`); }
+        }
+        function navigateToNextResult() { if (!appState.searchResults.length) return; appState.currentSearchIndex = (appState.currentSearchIndex + 1) % appState.searchResults.length; navigateToResult(); }
+        function navigateToPrevResult() { if (!appState.searchResults.length) return; appState.currentSearchIndex = (appState.currentSearchIndex - 1 + appState.searchResults.length) % appState.searchResults.length; navigateToResult(); }
+        function navigateToResult() { const r = appState.searchResults[appState.currentSearchIndex]; if (!r) return; switchTab(r.testament); appState.currentBook = { name: r.book, testament: r.testament }; document.getElementById('chapter-content').style.display = 'block'; loadChapterForSearch(r.chapter - 1); setTimeout(() => { highlightSearchResultsParagraph(); const el = document.getElementById(`verse-${r.verse - 1}`); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300); }
+        function clearSearch() { appState.searchResults = []; appState.currentSearchIndex = -1; appState.currentSearchTerm = ''; const nav = document.querySelector('.search-results-nav'); if (nav) nav.style.display = 'none'; const input = document.getElementById('search-input-main'); if (input) input.value = ''; if (appState.currentBook && appState.currentChapter !== null) loadChapter(appState.currentChapter); }
+
+        // ============ PÁGINA DE RESULTADOS ============
+        let resultsState = { filteredResults: [], selectedBook: null, sortOrder: 'relevance' };
+        function showSearchResultsPage() { if (!appState.searchResults.length) return; resultsState.filteredResults = [...appState.searchResults]; resultsState.selectedBook = null; const rp = document.getElementById('search-results-page'); if (rp) rp.style.display = 'flex'; const hero = document.getElementById('search-hero'); if (hero) hero.style.display = 'none'; renderSearchResultsPage(); }
+        function renderSearchResultsPage() { renderResultsSummary(); renderOccurrencesSidebar(); renderResultsList(); }
+        function renderResultsSummary() { const summary = document.getElementById('search-results-summary'); if (!summary) return; const total = resultsState.filteredResults.length; const totalBooks = getOccurrencesFromResults(resultsState.filteredResults).length; summary.innerHTML = `🔍 <strong>${total}</strong> resultado${total !== 1 ? 's' : ''} em <strong>${totalBooks}</strong> livro${totalBooks !== 1 ? 's' : ''} para "<strong>${appState.currentSearchTerm}</strong>"`; }
+        function getOccurrencesFromResults(results) { const occ = {}; results.forEach(r => { if (!occ[r.book]) occ[r.book] = { count: 0, testament: r.testament }; occ[r.book].count++; }); return Object.entries(occ).sort((a, b) => b[1].count - a[1].count).map(([book, data]) => ({ book, ...data })); }
+        function renderOccurrencesSidebar() { const list = document.getElementById('results-occurrences-list'); if (!list) return; const occ = getOccurrencesFromResults(resultsState.filteredResults); list.innerHTML = `<div class="occurrence-book-item ${resultsState.selectedBook === null ? 'active' : ''}" onclick="filterResultsByBook(null)"><span class="occurrence-book-name">📚 Todos os livros</span><span class="occurrence-book-badge">${resultsState.filteredResults.length}</span></div>${occ.map(item => `<div class="occurrence-book-item ${resultsState.selectedBook === item.book ? 'active' : ''}" onclick="filterResultsByBook('${item.book.replace(/'/g, "\\'")}')"><span class="occurrence-book-name">📖 ${item.book}</span><span class="occurrence-book-badge">${item.count}</span></div>`).join('')}`; }
+        function filterResultsByBook(bookName) { resultsState.selectedBook = bookName; resultsState.filteredResults = bookName === null ? [...appState.searchResults] : appState.searchResults.filter(r => r.book === bookName); renderOccurrencesSidebar(); renderResultsList(); renderResultsSummary(); const main = document.getElementById('search-results-main'); if (main) main.scrollIntoView({ behavior: 'smooth' }); }
+        function renderResultsList() {
+            const list = document.getElementById('results-list'); if (!list) return; const results = resultsState.filteredResults;
+            if (!results.length) { list.innerHTML = `<div class="no-results-full"><div class="icon">📭</div><p>Nenhum resultado encontrado.</p></div>`; return; }
+            let sorted = [...results]; if (resultsState.sortOrder === 'canonical') { sorted.sort((a, b) => { const ab = [...BIBLE_BOOKS.old, ...BIBLE_BOOKS.new]; const ia = ab.indexOf(a.book), ib = ab.indexOf(b.book); if (ia !== ib) return ia - ib; if (a.chapter !== b.chapter) return a.chapter - b.chapter; return a.verse - b.verse; }); }
+            list.innerHTML = `<div class="results-info-bar"><span>Mostrando ${sorted.length} de ${appState.searchResults.length} resultados</span><button class="results-sort-btn" onclick="toggleSortOrder()">📋 ${resultsState.sortOrder === 'relevance' ? 'Ordenar por livro' : 'Ordenar por relevância'}</button></div>`;
+            sorted.forEach((result, index) => { const card = document.createElement('div'); card.className = 'result-card'; card.innerHTML = `<div class="result-card-header"><span class="result-reference">📍 ${result.book} ${result.chapter}:${result.verse}</span><span class="result-book-badge">${result.testament === 'old' ? 'AT' : 'NT'}</span></div><div class="result-text">${highlightTerm(result.text, appState.currentSearchTerm)}</div><div class="result-actions"><button class="result-action-btn" onclick="event.stopPropagation(); navigateToResultFromPage(${index})">📖 Abrir</button><button class="result-action-btn" onclick="event.stopPropagation(); openNoteModal('${result.book.replace(/'/g, "\\'")}',${result.chapter},${result.verse})">📝 Nota</button><button class="result-action-btn" onclick="event.stopPropagation(); toggleFavoriteFromResults('${result.book.replace(/'/g, "\\'")}',${result.chapter},${result.verse},this)">${isFavorite(result.book, result.chapter, result.verse) ? '⭐' : '☆'}</button></div>`; card.addEventListener('click', () => navigateToResultFromPage(index)); list.appendChild(card); });
+        }
+        function highlightTerm(text, term) { if (!term) return text; return text.replace(new RegExp(`(${escapeRegExp(term)})`, 'gi'), '<mark>$1</mark>'); }
+        function toggleSortOrder() { resultsState.sortOrder = resultsState.sortOrder === 'relevance' ? 'canonical' : 'relevance'; renderResultsList(); }
+        function navigateToResultFromPage(index) { const result = resultsState.filteredResults[index]; if (!result) return; appState.currentSearchIndex = appState.searchResults.indexOf(result); switchTab(result.testament); appState.currentBook = { name: result.book, testament: result.testament }; document.getElementById('chapter-content').style.display = 'block'; loadChapterForSearch(result.chapter - 1); setTimeout(() => { highlightSearchResultsParagraph(); const el = document.getElementById(`verse-${result.verse - 1}`); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300); }
+        function toggleFavoriteFromResults(book, chapter, verse, button) { const idx = appState.favorites.findIndex(f => f.book === book && f.chapter === chapter && f.verse === verse); if (idx > -1) { appState.favorites.splice(idx, 1); button.textContent = '☆'; } else { appState.favorites.push({ book, chapter, verse }); button.textContent = '⭐'; } saveFavorites(); }
+
+        // ============ NOTAS ============
+        let currentNoteVerse = null;
+        function openNoteModal(book, chapter, verse) { currentNoteVerse = { book, chapter, verse }; document.getElementById('note-verse-ref').textContent = `${book} ${chapter}:${verse}`; document.getElementById('note-textarea').value = appState.notes[getVerseKey(book, chapter, verse)] || ''; document.getElementById('note-modal').style.display = 'flex'; }
+        function saveCurrentNote() { if (!currentNoteVerse) return; const key = getVerseKey(currentNoteVerse.book, currentNoteVerse.chapter, currentNoteVerse.verse); const text = document.getElementById('note-textarea').value.trim(); if (text) appState.notes[key] = text; else delete appState.notes[key]; localStorage.setItem('bibleNotes', JSON.stringify(appState.notes)); document.getElementById('note-modal').style.display = 'none'; loadChapter(appState.currentChapter); }
+
+        // ============ REFERÊNCIAS CRUZADAS ============
+        function openCrossrefModal(book, chapter, verse) {
+            const key = getVerseKey(book, chapter, verse); const refs = appState.crossrefDB[key] || []; const list = document.getElementById('crossref-list');
+            if (!appState.crossrefLoaded) { list.innerHTML = '<div class="no-crossrefs">🔄 Carregando referências...</div>'; loadCrossrefData().then(() => openCrossrefModal(book, chapter, verse)); document.getElementById('crossref-modal').style.display = 'flex'; return; }
+            list.innerHTML = refs.length === 0 ? '<div class="no-crossrefs">📭 Nenhuma referência encontrada.</div>' : refs.slice(0, 50).map(ref => { const [b, c, v] = ref.split('-'); return `<div class="crossref-item" onclick="navigateToCrossRef('${b.replace(/'/g, "\\'")}',${c},${v})"><span class="crossref-arrow">↗</span><span class="crossref-text">📖 ${b} ${c}:${v}</span></div>`; }).join('');
+            document.getElementById('crossref-modal').style.display = 'flex';
+        }
+        function navigateToCrossRef(book, chapter, verse) { document.getElementById('crossref-modal').style.display = 'none'; switchTab(getTestament(book)); appState.currentBook = { name: book, testament: getTestament(book) }; loadChapter(chapter - 1); setTimeout(() => { const el = document.getElementById(`verse-${verse - 1}`); if (el) { el.style.background = 'var(--highlight)'; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => el.style.background = '', 2500); } }, 300); }
+
+        // ============ FAVORITOS ============
+        function toggleFavorite(book, chapter, verse, button) { const idx = appState.favorites.findIndex(f => f.book === book && f.chapter === chapter && f.verse === verse); if (idx > -1) { appState.favorites.splice(idx, 1); button.textContent = '☆'; } else { appState.favorites.push({ book, chapter, verse }); button.textContent = '⭐'; } saveFavorites(); }
+        function showFavorites() { const m = document.getElementById('favorites-modal'); document.getElementById('favorites-list').innerHTML = appState.favorites.length === 0 ? '<div class="no-favorites">📌 Nenhum favorito</div>' : appState.favorites.map(f => `<div class="favorite-item"><div class="favorite-verse" onclick="navigateToFavorite('${f.book}',${f.chapter},${f.verse})">📖 ${f.book} ${f.chapter}:${f.verse}</div><button class="remove-favorite" onclick="event.stopPropagation();removeFavorite('${f.book}',${f.chapter},${f.verse})">×</button></div>`).join(''); m.style.display = 'flex'; }
+        function removeFavorite(book, chapter, verse) { appState.favorites = appState.favorites.filter(f => !(f.book === book && f.chapter === chapter && f.verse === verse)); saveFavorites(); showFavorites(); }
+        function navigateToFavorite(book, chapter, verse) { document.getElementById('favorites-modal').style.display = 'none'; switchTab(getTestament(book)); appState.currentBook = { name: book, testament: getTestament(book) }; loadChapter(chapter - 1); setTimeout(() => { const el = document.getElementById(`verse-${verse - 1}`); if (el) { el.style.background = 'var(--highlight)'; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => el.style.background = '', 2000); } }, 300); }
+
+        // ============ DICIONÁRIO ============
+        const GOOGLE_SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRyKldWoX_tgEKPTgziJczUpROwUFNal0AAT11Mov-zLwfNb-nmfTnRb2REw6GsGhZgo_tR6T7fe6HC/pub?output=csv';
+        let dictionaryData = null; let dictionaryLoading = false;
+        async function loadDictionary() { if (dictionaryData) return; if (dictionaryLoading) return; dictionaryLoading = true; try { const r = await fetch(GOOGLE_SHEETS_CSV_URL); const csv = await r.text(); const rows = []; let cr = [], cc = '', iq = false; for (const ch of csv) { if (ch === '"') iq = !iq; else if (ch === ',' && !iq) { cr.push(cc.trim()); cc = ''; } else if (ch === '\n' && !iq) { cr.push(cc.trim()); rows.push(cr); cr = []; cc = ''; } else cc += ch; } if (cc || cr.length) { cr.push(cc.trim()); rows.push(cr); } const headers = rows[0].map(h => h.toLowerCase().replace(/"/g, '')); const termos = []; for (let i = 1; i < rows.length; i++) { const cols = rows[i]; if (!cols[0]) continue; const termo = {}; headers.forEach((h, idx) => { termo[h] = (cols[idx] || '').replace(/"/g, ''); }); if (termo.name) { termo.id = i; termos.push(termo); } } dictionaryData = { biblioteca: { titulo: "Dicionário Bíblico", dataExportacao: new Date().toLocaleString(), totalTermos: termos.length, termos: termos } }; } catch (e) { dictionaryData = { biblioteca: { termos: [] } }; } dictionaryLoading = false; }
+        function showDictionary() { document.getElementById('dictionary-modal').style.display = 'flex'; document.getElementById('dictionary-search').value = ''; document.getElementById('dictionary-results').innerHTML = '<div class="no-favorites">📚 Digite um termo</div>'; loadDictionary(); }
+        function searchDictionary() { const term = document.getElementById('dictionary-search').value.trim().toLowerCase(); const rd = document.getElementById('dictionary-results'); if (!term) { rd.innerHTML = '<div class="no-favorites">📚 Digite um termo</div>'; return; } if (!dictionaryData?.biblioteca?.termos?.length) { loadDictionary().then(() => searchDictionary()); return; } const results = dictionaryData.biblioteca.termos.filter(i => i.name?.toLowerCase().includes(term) || i.definition?.toLowerCase().includes(term) || i.category?.toLowerCase().includes(term)).slice(0, 20); rd.innerHTML = results.length === 0 ? '<div class="no-favorites">📭 Nenhum termo encontrado</div>' : results.map(i => `<div class="dictionary-item"><div class="dictionary-term">📖 ${i.name} ${i.category ? `<span class="dictionary-category">${i.category}</span>` : ''}</div><div class="dictionary-definition">${i.definition}</div>${i.reference ? `<div class="dictionary-reference">📖 ${i.reference}</div>` : ''}${i.verse ? `<div class="dictionary-verse">"${i.verse}"</div>` : ''}</div>`).join(''); }
+        function searchDictionaryMain() { const term = document.getElementById('dictionary-search-main')?.value?.trim()?.toLowerCase(); const rd = document.getElementById('dictionary-results-main'); if (!rd) return; if (!term) { rd.innerHTML = '<div class="no-favorites">📚 Digite um termo para buscar</div>'; return; } if (!dictionaryData?.biblioteca?.termos?.length) { rd.innerHTML = '<div class="loading">Carregando...</div>'; loadDictionary().then(() => searchDictionaryMain()); return; } const results = dictionaryData.biblioteca.termos.filter(i => i.name?.toLowerCase().includes(term) || i.definition?.toLowerCase().includes(term) || i.category?.toLowerCase().includes(term) || i.reference?.toLowerCase().includes(term)).slice(0, 30); rd.innerHTML = results.length === 0 ? `<div class="no-favorites">📭 Nenhum termo para "${term}"</div>` : `<div class="dictionary-results-header">${results.length} resultado(s) para "<strong>${term}</strong>"</div>` + results.map(i => `<div class="dictionary-card"><div class="dictionary-card-term">📖 ${i.name} ${i.category ? `<span class="dictionary-category">${i.category}</span>` : ''}</div><div class="dictionary-card-definition">${i.definition}</div>${i.reference ? `<div class="dictionary-reference">📖 ${i.reference}</div>` : ''}${i.verse ? `<div class="dictionary-verse">"${i.verse}"</div>` : ''}</div>`).join(''); }
+
+        // ============ CRONOLOGIA ============
+        let cronologiaData = null, cronologiaEvangelhosData = null, cronologiaAtual = 'geral';
+        async function loadCronologia() { document.querySelectorAll('.cronologia-tab').forEach(t => { t.addEventListener('click', function () { document.querySelectorAll('.cronologia-tab').forEach(x => x.classList.remove('active')); this.classList.add('active'); cronologiaAtual = this.dataset.cron; carregarConteudo(); }); }); await carregarConteudo(); }
+        async function carregarConteudo() { const content = document.getElementById('cronologia-content'); if (!content) return; content.innerHTML = '<div class="loading">Carregando...</div>'; if (cronologiaAtual === 'geral') { if (!cronologiaData) { try { const r = await fetch('data/cronologia.json'); if (r.ok) cronologiaData = await r.json(); } catch (e) { content.innerHTML = '<div class="no-favorites">📭 Arquivo não encontrado.</div>'; return; } } renderCronologiaGeral(); } else { if (!cronologiaEvangelhosData) { try { const r = await fetch('data/cronologia-evangelhos.json'); if (r.ok) cronologiaEvangelhosData = await r.json(); } catch (e) { content.innerHTML = '<div class="no-favorites">📭 Arquivo não encontrado.</div>'; return; } } renderCronologiaEvangelhos(); } }
+        function renderCronologiaGeral() { const content = document.getElementById('cronologia-content'); if (!content || !cronologiaData?.cronologia_biblica) return; const d = cronologiaData.cronologia_biblica; let h = ''; if (d.antigo_testamento) { h += '<div class="cronologia-section"><h3 class="cronologia-section-title">📜 Antigo Testamento</h3>'; const at = d.antigo_testamento; if (at.pre_historia) { h += '<div class="cronologia-card"><h4 class="cronologia-card-title">🌍 Pré-História</h4><ul class="cronologia-list">'; at.pre_historia.eventos.forEach(e => h += `<li class="cronologia-item">${e}</li>`); h += '</ul></div>'; } if (at.patriarcas_2220_ac) { h += '<div class="cronologia-card"><h4 class="cronologia-card-title">👨‍👩‍👦 Patriarcas (~2220 a.C.)</h4><div class="cronologia-figuras">'; at.patriarcas_2220_ac.figuras_chave.forEach(f => h += `<span class="cronologia-tag">${f}</span>`); h += '</div></div>'; } if (at.reino_unido) { h += '<div class="cronologia-card"><h4 class="cronologia-card-title">👑 Reino Unido</h4><div class="cronologia-timeline-compact">'; for (const [rei, periodo] of Object.entries(at.reino_unido)) h += `<div class="cronologia-rei"><span class="rei-nome">${rei.charAt(0).toUpperCase() + rei.slice(1)}</span><span class="rei-periodo">${periodo}</span></div>`; h += '</div></div>'; } h += '</div>'; } if (d.periodo_intertestamentario) { h += '<div class="cronologia-section"><h3 class="cronologia-section-title">📖 Período Intertestamentário</h3><div class="cronologia-card"><div class="cronologia-timeline-compact">'; d.periodo_intertestamentario["400_ac_a_1_ac"].forEach(i => h += `<div class="cronologia-rei"><span class="rei-nome">${i.dominio || i.rei}</span><span class="rei-periodo">${i.periodo}</span></div>`); h += '</div></div></div>'; } if (d.novo_testamento) { h += '<div class="cronologia-section"><h3 class="cronologia-section-title">✝️ Novo Testamento</h3>'; const nt = d.novo_testamento; if (nt.vida_de_jesus) { h += '<div class="cronologia-card"><h4 class="cronologia-card-title">👶 Vida de Jesus</h4><div class="cronologia-timeline-compact">'; for (const [e, data] of Object.entries(nt.vida_de_jesus)) h += `<div class="cronologia-rei"><span class="rei-nome">${e.charAt(0).toUpperCase() + e.slice(1).replace(/_/g, ' ')}</span><span class="rei-periodo">${data}</span></div>`; h += '</div></div>'; } if (nt.periodo_dos_apostolos) { h += '<div class="cronologia-card"><h4 class="cronologia-card-title">🕊️ Período dos Apóstolos</h4><ul class="cronologia-list">'; nt.periodo_dos_apostolos.eventos_chave.forEach(e => h += `<li class="cronologia-item"><strong>${e.evento}</strong> <span class="evento-data-peq">${e.data}</span></li>`); h += '</ul></div>'; } h += '</div>'; } if (d.fonte) h += `<div class="cronologia-fonte">📚 ${d.fonte}</div>`; content.innerHTML = h; }
+        function renderCronologiaEvangelhos() { const content = document.getElementById('cronologia-content'); if (!content || !cronologiaEvangelhosData) return; const d = cronologiaEvangelhosData; let h = `<div class="cronologia-section"><h3 class="cronologia-section-title">✝️ ${d.titulo || 'Cronologia dos Evangelhos'}</h3>`; if (d.autor) h += `<p class="cronologia-autor">👤 Autor: ${d.autor}</p>`; if (d.descricao) h += `<p class="cronologia-descricao">${d.descricao}</p>`; h += '</div>'; if (d.cronologia) { for (const [cat, eventos] of Object.entries(d.cronologia)) { if (typeof eventos === 'string') { h += `<div class="cronologia-intersticio"><span class="intersticio-icon">⏱️</span><span class="intersticio-texto">${eventos}</span></div>`; continue; } const cf = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()); h += `<div class="cronologia-section"><h3 class="cronologia-section-title">📖 ${cf}</h3><div class="cronologia-card">`; if (Array.isArray(eventos)) { eventos.forEach((ev, idx) => { h += `<div class="cronologia-evento-item"><span class="evento-numero">${idx + 1}</span><span class="evento-referencia">📖 ${ev.referencia || ''}</span><span class="evento-descricao">${ev.evento || ''}</span>${ev.paralelos ? `<span class="evento-paralelos">📋 ${ev.paralelos.join(', ')}</span>` : ''}</div>`; }); } h += '</div></div>'; } } content.innerHTML = h || '<div class="no-favorites">Nenhum dado encontrado.</div>'; }
+
+        // ============ ÁUDIO ============
+        const audioState = { isPlaying: false, isPaused: false, currentVerseIndex: 0, verses: [], utterance: null };
+        function checkTTS() { return 'speechSynthesis' in window; }
+        function getPortugueseVoice() { const voices = speechSynthesis.getVoices(); let voice = voices.find(v => v.lang.startsWith('pt-BR')); if (!voice) voice = voices.find(v => v.lang.startsWith('pt')); if (!voice) voice = voices[0]; return voice; }
+        function getAudioSpeed() { const ss = document.getElementById('audio-speed'); return ss ? parseFloat(ss.value) : 1; }
+        function updateAudioButtons(playing, paused) { const play = document.getElementById('play-chapter'), pause = document.getElementById('pause-chapter'), stop = document.getElementById('stop-chapter'); if (!play || !pause || !stop) return; if (playing && !paused) { play.style.display = 'none'; pause.style.display = 'flex'; stop.style.display = 'flex'; } else if (playing && paused) { play.style.display = 'flex'; play.textContent = '▶️'; pause.style.display = 'none'; stop.style.display = 'flex'; } else { play.style.display = 'flex'; play.textContent = '🔊'; pause.style.display = 'none'; stop.style.display = 'none'; } }
+        function playChapterAudio() { if (!checkTTS()) { alert('Navegador não suporta'); return; } if (!appState.currentBook || appState.currentChapter === null) { alert('Selecione um capítulo'); return; } const bd = findBook(appState.currentBook.name); if (!bd) return; if (audioState.isPaused) { speechSynthesis.resume(); audioState.isPaused = false; updateAudioButtons(true, false); return; } stopChapterAudio(); const ca = Array.isArray(bd.chapters) ? bd.chapters : Object.values(bd.chapters); audioState.verses = ca[appState.currentChapter]; audioState.currentVerseIndex = 0; audioState.isPlaying = true; audioState.isPaused = false; updateAudioButtons(true, false); speakCurrentVerse(); }
+        function pauseChapterAudio() { if (audioState.isPlaying) { speechSynthesis.pause(); audioState.isPaused = true; updateAudioButtons(true, true); } }
+        function stopChapterAudio() { speechSynthesis.cancel(); audioState.isPlaying = false; audioState.isPaused = false; audioState.currentVerseIndex = 0; audioState.verses = []; updateAudioButtons(false, false); }
+        function speakCurrentVerse() { if (!audioState.isPlaying || audioState.isPaused) return; if (audioState.currentVerseIndex >= audioState.verses.length) { stopChapterAudio(); return; } const verse = audioState.verses[audioState.currentVerseIndex]; if (!verse || verse.trim() === '') { audioState.currentVerseIndex++; speakCurrentVerse(); return; } const u = new SpeechSynthesisUtterance(verse); u.voice = getPortugueseVoice(); u.rate = getAudioSpeed(); u.pitch = 1; u.volume = 1; u.lang = 'pt-BR'; u.onend = function () { if (audioState.isPlaying && !audioState.isPaused) { audioState.currentVerseIndex++; speakCurrentVerse(); } }; u.onerror = function (e) { if (e.error !== 'canceled' && e.error !== 'interrupted') { audioState.currentVerseIndex++; speakCurrentVerse(); } }; audioState.utterance = u; speechSynthesis.speak(u); }
+        function playVerseAudio(verseIndex) { if (!checkTTS()) { alert('Navegador não suporta'); return; } const bd = findBook(appState.currentBook.name); if (!bd) return; stopChapterAudio(); const ca = Array.isArray(bd.chapters) ? bd.chapters : Object.values(bd.chapters); const verse = ca[appState.currentChapter]?.[verseIndex]; if (!verse) return; const u = new SpeechSynthesisUtterance(verse); u.voice = getPortugueseVoice(); u.rate = getAudioSpeed(); u.pitch = 1; u.volume = 1; u.lang = 'pt-BR'; speechSynthesis.speak(u); }
+        if ('speechSynthesis' in window) { speechSynthesis.onvoiceschanged = function () { console.log('🎤 Vozes:', speechSynthesis.getVoices().length); }; }
+
+        // ============ PÁGINAS DE CONTEÚDO ============
+        function openContentPage(page) {
+            const modal = document.getElementById('content-modal'); const title = document.getElementById('content-title'); const body = document.getElementById('content-body');
+            const pages = {
+                sobre: { title: '📖 Sobre o Sola Verbo', content: `<div class="content-page"><div class="content-section"><h3>O que é o Sola Verbo?</h3><p>O <strong>Sola Verbo</strong> é uma Bíblia de Estudo digital gratuita com 13 versões, referências cruzadas, dicionário, comparação de versões e muito mais.</p></div><div class="content-section"><h3>Versão 2.0 - 2026</h3><p>Desenvolvido por Jairo Caetano</p></div></div>` },
+                contato: { title: '✉️ Contato', content: `<div class="content-page"><div class="content-section"><h3>Entre em Contato</h3><p>👤 Jairo Caetano</p><p>✉️ emailcaetano@email.com</p><p>📍 Araçatuba - SP</p></div></div>` },
+                noticias: { title: '📰 Notícias', content: `<div class="content-page"><div class="content-section"><h3>Últimas Atualizações</h3><p>🎉 Versão 2.0 - Maio 2026: Nova interface, parágrafos, zoom, Google Sheets.</p></div></div>` },
+                doar: { title: '❤️ Apoie o Projeto', content: `<div class="content-page"><div class="content-section"><h3>Por que doar?</h3><p>O Sola Verbo é gratuito. Sua doação ajuda a manter o projeto.</p><p style="color:var(--gold);">"Mais bem-aventurado é dar do que receber." Atos 20:35</p></div></div>` }
+            };
+            const pd = pages[page]; if (!pd) return; title.innerHTML = pd.title; body.innerHTML = pd.content; modal.style.display = 'flex';
+        }
+        function closeContentPage() { document.getElementById('content-modal').style.display = 'none'; }
+
+        // ============ DETECTOR DE EMOÇÕES ============
+        const emotionDictionary = {
+            alegria: { words: ['alegria', 'feliz', 'felicidade', 'alegre', 'júbilo', 'regozijo', 'exultação', 'gratidão', 'grato', 'abençoado', 'maravilhoso', 'ótimo', 'excelente', 'bom', 'lindo', 'bênção', 'louvor', 'glória', 'aleluia', 'vitória', 'triunfo', 'celebrar', 'sorrir'], emoji: '😊', color: '#4CAF50', label: 'Alegria' },
+            tristeza: { words: ['triste', 'tristeza', 'chorar', 'lágrimas', 'lamento', 'dor', 'sofrimento', 'angústia', 'aflição', 'desespero', 'abatido', 'desanimado', 'melancolia', 'saudade', 'solidão', 'perdi', 'morte'], emoji: '😢', color: '#2196F3', label: 'Tristeza' },
+            raiva: { words: ['raiva', 'ira', 'furioso', 'ódio', 'cólera', 'indignação', 'revolta', 'vingança', 'destruir', 'injustiça', 'cruel', 'violência', 'irado', 'zangado'], emoji: '😠', color: '#F44336', label: 'Raiva' },
+            motivacao: { words: ['força', 'coragem', 'perseverar', 'lutar', 'vencer', 'conquistar', 'superar', 'determinação', 'foco', 'disciplina', 'dedicação'], emoji: '💪', color: '#FF9800', label: 'Motivação' },
+            esperanca: { words: ['esperança', 'confiança', 'confiar', 'fé', 'crer', 'promessa', 'futuro', 'renovação', 'recomeçar', 'oportunidade', 'novo', 'salvação'], emoji: '🌟', color: '#FFC107', label: 'Esperança' },
+            amor: { words: ['amor', 'amar', 'carinho', 'afeto', 'paixão', 'coração', 'ternura', 'cuidar', 'abraçar', 'beijo', 'união'], emoji: '❤️', color: '#E91E63', label: 'Amor' },
+            medo: { words: ['medo', 'temer', 'assustado', 'pavor', 'terror', 'pânico', 'inseguro', 'dúvida', 'incerteza', 'ameaça', 'perigo'], emoji: '😨', color: '#9C27B0', label: 'Medo' },
+            gratidao: { words: ['grato', 'gratidão', 'agradecer', 'obrigado', 'reconhecimento', 'graça', 'favor', 'benção', 'bondade', 'misericórdia'], emoji: '🙏', color: '#00BCD4', label: 'Gratidão' }
+        };
+        let emotionDetectorActive = false, emotionUpdateTimeout = null;
+        function createEmotionDetector() {
+            if (document.getElementById('emotion-detector')) return;
+            const detector = document.createElement('div'); detector.id = 'emotion-detector'; detector.className = 'emotion-detector';
+            detector.innerHTML = `<div class="emotion-detector-header"><span class="emotion-detector-title">🎭 Analisador de Emoções</span><button class="emotion-close-btn" onclick="toggleEmotionDetector()" title="Fechar">×</button></div><div class="emotion-input-area"><textarea id="emotion-input" class="emotion-textarea" placeholder="Digite uma frase para análise emocional..." rows="3"></textarea><div class="emotion-actions"><button id="emotion-analyze-btn" class="emotion-analyze-btn">🔍 Analisar</button><button id="emotion-clear-btn" class="emotion-clear-btn">🗑️ Limpar</button></div></div><div id="emotion-results" class="emotion-results"><div class="emotion-placeholder">Digite algo e clique em Analisar...</div></div>`;
+            document.body.appendChild(detector);
+            document.getElementById('emotion-analyze-btn').addEventListener('click', analyzeEmotion);
+            document.getElementById('emotion-clear-btn').addEventListener('click', clearEmotion);
+            const input = document.getElementById('emotion-input');
+            input.addEventListener('input', () => { clearTimeout(emotionUpdateTimeout); emotionUpdateTimeout = setTimeout(analyzeEmotion, 500); });
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); analyzeEmotion(); } });
+        }
+        function toggleEmotionDetector() {
+            if (!document.getElementById('emotion-detector')) { createEmotionDetector(); emotionDetectorActive = true; setTimeout(() => document.getElementById('emotion-input').focus(), 100); return; }
+            emotionDetectorActive = !emotionDetectorActive; document.getElementById('emotion-detector').style.display = emotionDetectorActive ? 'block' : 'none';
+            if (emotionDetectorActive) setTimeout(() => document.getElementById('emotion-input').focus(), 100);
+        }
+        function analyzeEmotion() {
+            const input = document.getElementById('emotion-input'), rd = document.getElementById('emotion-results'); if (!input || !rd) return;
+            const text = input.value.trim().toLowerCase(); if (!text) { rd.innerHTML = '<div class="emotion-placeholder">Digite algo...</div>'; return; }
+            const words = text.split(/\s+/); const scores = {}, matched = {}; let total = 0;
+            for (const [emotion, data] of Object.entries(emotionDictionary)) { scores[emotion] = 0; matched[emotion] = []; for (const w of words) { const cw = w.replace(/[.,!?;:()""'']/g, ''); if (data.words.includes(cw)) { scores[emotion]++; matched[emotion].push(cw); total++; } } }
+            const sorted = Object.entries(scores).filter(([, s]) => s > 0).sort(([, a], [, b]) => b - a);
+            if (!sorted.length) { rd.innerHTML = '<div class="emotion-neutral"><span class="emotion-neutral-icon">😐</span><p>Nenhuma emoção detectada.</p></div>'; return; }
+            const dominant = sorted[0][0], dd = emotionDictionary[dominant], ts = sorted.reduce((s, [, v]) => s + v, 0);
+            rd.innerHTML = `<div class="emotion-dominant" style="border-left-color:${dd.color}"><div class="emotion-dominant-header"><span class="emotion-dominant-emoji">${dd.emoji}</span><span class="emotion-dominant-label">${dd.label}</span><span class="emotion-dominant-score">${Math.round((scores[dominant] / ts) * 100)}%</span></div><div class="emotion-dominant-words">Palavras: ${matched[dominant].map(w => `<span class="emotion-word-tag" style="background:${dd.color}">${w}</span>`).join(' ')}</div></div>${sorted.length > 1 ? `<div class="emotion-others"><div class="emotion-others-title">Outras emoções:</div>${sorted.slice(1).map(([emotion, score]) => { const d = emotionDictionary[emotion]; return `<div class="emotion-bar-item"><span class="emotion-bar-emoji">${d.emoji}</span><span class="emotion-bar-label">${d.label}</span><div class="emotion-bar-container"><div class="emotion-bar-fill" style="width:${Math.round((score / ts) * 100)}%;background:${d.color};"></div></div><span class="emotion-bar-score">${Math.round((score / ts) * 100)}%</span></div>`; }).join('')}</div>` : ''}<div class="emotion-total">${total} palavra(s) em ${words.length}</div>`;
+        }
+        function clearEmotion() { const i = document.getElementById('emotion-input'), r = document.getElementById('emotion-results'); if (i) i.value = ''; if (r) r.innerHTML = '<div class="emotion-placeholder">Digite algo...</div>'; if (i) i.focus(); }
+
+        // ============ COMPARAÇÃO ============
+        function populateCompareBooks() { const s = document.getElementById('compare-book'); if (!s) return; s.innerHTML = '<option value="">Selecione um livro</option>';[...BIBLE_BOOKS.old, ...BIBLE_BOOKS.new].forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; s.appendChild(o); }); }
+        function updateCompareChapters() { const bs = document.getElementById('compare-book'), cs = document.getElementById('compare-chapter'); if (!bs || !cs) return; cs.innerHTML = '<option value="">Selecione</option>'; if (bs.value) { const bd = findBook(bs.value); if (bd && bd.chapters) { const ca = Array.isArray(bd.chapters) ? bd.chapters : Object.values(bd.chapters); for (let i = 1; i <= ca.length; i++) { const o = document.createElement('option'); o.value = i; o.textContent = `Capítulo ${i}`; cs.appendChild(o); } cs.disabled = false; } } else { cs.disabled = true; } }
+        async function runCompare() { const v1 = document.getElementById('compare-version-1')?.value, v2 = document.getElementById('compare-version-2')?.value, book = document.getElementById('compare-book')?.value, chapter = document.getElementById('compare-chapter')?.value; if (!book || !chapter) { alert('Selecione livro e capítulo'); return; } let d1 = appState.bibleData; if (v1 !== appState.currentVersion) { try { const r = await fetch(`data/${v1}.json`); if (r.ok) d1 = convertBibleFormat(await r.json(), v1); } catch (e) { } } let d2 = appState.compareData; if (v2 !== appState.compareVersion) { try { const r = await fetch(`data/${v2}.json`); if (r.ok) d2 = convertBibleFormat(await r.json(), v2); } catch (e) { } } const bd1 = findBook(book, d1), bd2 = findBook(book, d2); const c1 = bd1 ? (Array.isArray(bd1.chapters) ? bd1.chapters : Object.values(bd1.chapters)) : [], c2 = bd2 ? (Array.isArray(bd2.chapters) ? bd2.chapters : Object.values(bd2.chapters)) : []; const vv1 = c1[chapter - 1] || [], vv2 = c2[chapter - 1] || [], max = Math.max(vv1.length, vv2.length); const p1 = document.getElementById('compare-pane-1'), p2 = document.getElementById('compare-pane-2'); if (p1) p1.innerHTML = `<h3 style="color:var(--gold);text-align:center;padding:10px;position:sticky;top:0;background:var(--surface);">📖 ${v1} - ${book} ${chapter}</h3>${Array.from({ length: max }, (_, i) => `<div style="padding:6px 10px;font-size:0.82rem;color:var(--text2);${vv2[i] && vv1[i] !== vv2[i] ? 'background:rgba(255,200,50,0.08);border-left:2px solid var(--gold)' : ''}"><strong style="color:var(--verse-num);">${i + 1}.</strong> ${vv1[i] || '—'}</div>`).join('')}`; if (p2) p2.innerHTML = `<h3 style="color:var(--gold);text-align:center;padding:10px;position:sticky;top:0;background:var(--surface);">📖 ${v2} - ${book} ${chapter}</h3>${Array.from({ length: max }, (_, i) => `<div style="padding:6px 10px;font-size:0.82rem;color:var(--text2);${vv1[i] && vv1[i] !== vv2[i] ? 'background:rgba(255,200,50,0.08);border-left:2px solid var(--gold)' : ''}"><strong style="color:var(--verse-num);">${i + 1}.</strong> ${vv2[i] || '—'}</div>`).join('')}`; }
+
+        // ============ INICIALIZAÇÃO E EVENTOS ============
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            const tb = document.querySelector(`[data-tab="${tab}"]`); if (tb) tb.classList.add('active');
+            ['book-list', 'chapter-content', 'compare-view-full', 'search-view', 'cronologia-view', 'dictionary-view'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+            const rp = document.getElementById('search-results-page'); if (rp) rp.style.display = 'none';
+            const hero = document.getElementById('search-hero'); if (hero) hero.style.display = 'block';
+            if (typeof stopChapterAudio === 'function') stopChapterAudio();
+            switch (tab) {
+                case 'old': appState.currentTestament = 'old'; const blO = document.getElementById('book-list'); if (blO) blO.style.display = 'block'; renderBookList(); break;
+                case 'new': appState.currentTestament = 'new'; const blN = document.getElementById('book-list'); if (blN) blN.style.display = 'block'; renderBookList(); break;
+                case 'dictionary': const dv = document.getElementById('dictionary-view'); if (dv) dv.style.display = 'block'; const di = document.getElementById('dictionary-search-main'); if (di) setTimeout(() => di.focus(), 100); break;
+                case 'cronologia': const cv = document.getElementById('cronologia-view'); if (cv) cv.style.display = 'block'; if (typeof loadCronologia === 'function') loadCronologia(); break;
+                case 'search': const sv = document.getElementById('search-view'); if (sv) sv.style.display = 'block'; const si = document.getElementById('search-input-main'); if (si) setTimeout(() => si.focus(), 100); break;
+                case 'compare': const cp = document.getElementById('compare-view-full'); if (cp) cp.style.display = 'block'; if (typeof populateCompareBooks === 'function') populateCompareBooks(); break;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await loadBibleData(appState.currentVersion); await loadCompareVersion();
+                if (!loadCrossrefFromStorage()) loadCrossrefData();
+                setupEventListeners(); renderBookList(); loadSearchHistory(); updateBookFilter(); applyZoom(currentZoom);
+            } catch (e) { console.error('Erro:', e); const bl = document.getElementById('book-list'); if (bl) bl.innerHTML = '<div style="color:red;padding:20px;">Erro ao carregar.</div>'; }
+        });
+
+        function setupEventListeners() {
+            const $ = (id) => document.getElementById(id);
+            const vs = $('version-selector'); if (vs) vs.addEventListener('change', async e => { await loadBibleData(e.target.value); updateBookFilter(); switchTab('old'); });
+            document.querySelectorAll('.nav-item').forEach(b => { b.addEventListener('click', e => switchTab(e.target.dataset.tab)); });
+            const bb = $('back-button'); if (bb) bb.addEventListener('click', goBack);
+            const hb = $('home-button'); if (hb) hb.addEventListener('click', () => switchTab('old'));
+            const fb = $('favorites-button'); if (fb) fb.addEventListener('click', showFavorites);
+            const db = $('dictionary-button'); if (db) db.addEventListener('click', showDictionary);
+            const sb = $('scroll-top-button'); if (sb) sb.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+            ['close-favorites', 'close-occurrences', 'close-dictionary'].forEach(id => { const btn = $(id); if (btn) { const mid = id.replace('close-', '') + '-modal'; btn.addEventListener('click', () => { const m = $(mid); if (m) m.style.display = 'none'; }); } });
+            const ft = $('filter-testament'); if (ft) ft.addEventListener('change', updateBookFilter);
+            const fbk = $('filter-book'); if (fbk) fbk.addEventListener('change', () => { updateChapterFilter(); appState.searchFilter.book = fbk.value; checkAutoNavigate(); });
+            const fc = $('filter-chapter'); if (fc) fc.addEventListener('change', () => { updateVerseFilter(); appState.searchFilter.chapter = fc.value; checkAutoNavigate(); });
+            const fv = $('filter-verse'); if (fv) fv.addEventListener('change', () => { appState.searchFilter.verse = fv.value; checkAutoNavigate(); });
+            const sbtn = $('search-button-main'), sinp = $('search-input-main');
+            if (sbtn && sinp) { sbtn.addEventListener('click', performSearch); sinp.addEventListener('keypress', e => { if (e.key === 'Enter') performSearch(); }); sinp.addEventListener('focus', () => { if (appState.searchHistory.length) { renderSearchHistory(); const hd = $('search-history'); if (hd) hd.classList.add('active'); } }); }
+            document.addEventListener('click', e => { const sb = document.querySelector('.search-bar-large'); if (sb && !sb.contains(e.target)) { const hd = $('search-history'); if (hd) hd.classList.remove('active'); } });
+            const pr = $('prev-result'); if (pr) pr.addEventListener('click', navigateToPrevResult);
+            const nr = $('next-result'); if (nr) nr.addEventListener('click', navigateToNextResult);
+            const so = $('show-occurrences'); if (so) so.addEventListener('click', () => { const cc = $('chapter-content'); if (cc) cc.style.display = 'none'; showSearchResultsPage(); });
+            const cs = $('clear-search'); if (cs) cs.addEventListener('click', clearSearch);
+            const bfr = $('back-from-results'); if (bfr) bfr.addEventListener('click', () => { const rp = $('search-results-page'); if (rp) rp.style.display = 'none'; const hero = $('search-hero'); if (hero) hero.style.display = 'block'; const si = $('search-input-main'); if (si) { si.value = ''; si.focus(); } });
+            const cg = $('compare-btn-go'); if (cg) cg.addEventListener('click', runCompare);
+            const cb = $('compare-book'); if (cb) cb.addEventListener('change', updateCompareChapters);
+            const pl = $('play-chapter'); if (pl) pl.addEventListener('click', playChapterAudio);
+            const pa = $('pause-chapter'); if (pa) pa.addEventListener('click', pauseChapterAudio);
+            const st = $('stop-chapter'); if (st) st.addEventListener('click', stopChapterAudio);
+            ['favorites-modal', 'occurrences-modal', 'note-modal', 'crossref-modal', 'dictionary-modal', 'content-modal'].forEach(id => { const m = $(id); if (m) m.addEventListener('click', e => { if (e.target === e.currentTarget) m.style.display = 'none'; }); });
+            const sn = $('save-note-btn'); if (sn) sn.addEventListener('click', saveCurrentNote);
+            const ds = $('dictionary-search'); if (ds) ds.addEventListener('input', searchDictionary);
+            const dsb = $('dictionary-search-btn'), dsi = $('dictionary-search-main'); if (dsb && dsi) { dsb.addEventListener('click', () => searchDictionaryMain()); dsi.addEventListener('keypress', e => { if (e.key === 'Enter') searchDictionaryMain(); }); }
+            const pcb = $('prev-chapter-btn'); if (pcb) pcb.addEventListener('click', () => navigateChapter(-1));
+            const ncb = $('next-chapter-btn'); if (ncb) ncb.addEventListener('click', () => navigateChapter(1));
+            const zob = $('zoom-out-btn'); if (zob) zob.addEventListener('click', () => applyZoom(currentZoom - 10));
+            const zib = $('zoom-in-btn'); if (zib) zib.addEventListener('click', () => applyZoom(currentZoom + 10));
+            const zrb = $('zoom-reset-btn'); if (zrb) zrb.addEventListener('click', () => applyZoom(100));
+            const zl = $('zoom-level'); if (zl) zl.addEventListener('click', () => applyZoom(100));
+        }
+
+        // ============ SERVICE WORKER ============
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('service-worker.js').then(r => console.log('✅ SW registrado')).catch(e => console.log('❌ SW falhou')); }); }
+    </script>
+</body>
+
+</html>
